@@ -1,0 +1,298 @@
+---
+title: "Workshop: Model assumptions"
+author: "Jens Roeser"
+#date: "04/03/2020"
+output: 
+  bookdown::html_document2: default
+#  pdf_document: default
+  ss: styles.css
+  fig_caption: yes
+  theme: flatly
+  toc: no
+  toc_depth: 1
+  spacing: double
+  indent: true
+#bibliography: references.bib
+---
+
+
+```{r, include=FALSE}
+library(citr) # CRTL + Shift + R for citations
+library(kableExtra)
+
+library(tidyverse)
+library(psyntur)
+set.seed(123)
+theme_set(theme_bw())
+```
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Lecture review
+
+- Parametric models (*t*-test, ANOVA, linear regression) make assumptions.
+- Assumptions related to the normal distribution
+  - data must be continuous; on a linear scale
+  - observations must be independent and identically distributed 
+- The normal distribution is assumed because of the central limit theorem
+
+# Learning outcomes
+
+- name central properties and aspects of the normal distribution
+- describe what homogeneity of variance means
+- simulate data in R
+- use a simulation to demonstrate the central limit theorem
+
+
+
+# Normal distribution (and its properties)
+
+## Simulate normal distributed data
+
+The function `rnorm` allows us to randomly sample normal distributed data (r=random, norm=normal). The function takes three parameter values, i.e. the number of samples *n*, the mean, and the standard deviation *sd*.
+
+Create random distributed data:
+
+```{r}
+n <- 5 # Number of obervations to be sampled.
+mean <- 500 # True population mean of the distribution. 
+sd <- 100 # True population sd of the distributions
+y <- rnorm(n = n, mean = mean, sd = sd)
+```
+
+These are our randomly sampled observations:
+
+```{r}
+y
+```
+
+
+Aside, functions like `rnorm` allow us to control population parameters. In reality we rarely know the population mean, say the average time it takes to recover from COVID, but we can estimate it from large enough samples. These population parameters are conventionally indicated with Greek letters, i.e. called $\mu$ (mu; the population mean) and $\sigma^2$ (sigma squared; the population variance). In the lecturer we talked about IQ for which the population mean $\mu$ and the variance $\sigma^2$ are set to 100 and 15, respectively.
+
+
+Aside, remember the *variance* is $sd^2$
+
+```{r}
+variance <- sd^2
+```
+
+and *sd* is the $\sqrt{variance}$
+
+```{r}
+sqrt(variance)
+```
+
+
+Plot the "fake" data.
+
+```{r}
+histogram(y, data = NULL)
+```
+
+Here are means of the sample. 
+```{r}
+mean(y); sd(y)
+```
+
+- **Question 1:** Compare the sample means to our population means. How are they different? Remember, we are in the almost unique sitation to know the population parameters.
+
+- **Question 2:** Are these data normal distributed? 
+ 
+In theory yes (we know that `rnorm` is generating normal distributed data); in practice not, the data above are almost uniform distributed.
+
+- ***Task 1:*** Create a histogram with sample size *n=*1000. Run the code. What changes did you make in the code? How has the histogram changed? Calculate the sample mean and sd again. How did they change?
+
+- ***Task 2:*** Create a histogram with sample size *n=*1000 and a *sd* of 10. What changes did you make in the code? How has the histogram changed? Calculate the sample mean and sd again. How did they change?
+
+- ***Task 3:*** If we know the population mean and population variance, we know everything we need to know to create data we would be expected under the normal distribution. Let's do this for IQ which has a population mean of 100 and a population sd of 15. Use an *n* of 1000 samples and plot a histogram of IQ.
+
+
+## The area under the curve
+
+Let's stick with the IQ example. We know the population values, which is extremly handy. Here is a density plot of IQ with a mean of 100 and a sd of 15. This should look similar to your plot from task 3. Except instead of counts / frequency, the density plot describes the relative likelihood of IQ values.
+
+```{r echo=FALSE}
+mean = 100
+sd = 15
+plot_range <- seq(50,150,2)
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5) +
+  labs(y = "Density", x = "IQ") 
+```
+
+Remeber, the area underneth the curve must sum to 1. In other words the likelihood of an observation to take on an IQ of any value under the curve is 1 (or 100%). The likelihood of a value to be outside this area is 0 (%). Those are the extremes. 
+
+We can now use the `pnorm` (probability normal) function to calculate areas underneath the curve. Again, we take the population means of IQ.
+
+```{r}
+mean <- 100
+sd <- 15
+```
+
+
+Say we want to know the probability of observing a person with an IQ **below** 100:
+
+```{r}
+pnorm(100, mean = mean, sd = sd)
+```
+
+In other words, 50% (0.5) of the population have an IQ below 100 (see the red shaded area in the density plot below).
+
+
+```{r echo=FALSE}
+mean = 100
+sd = 15
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(50,100)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+
+- ***Task 1:*** Calculate the probability of observing a person with an IQ below 75 corresponding to the area shaded in this plot:
+
+```{r echo=FALSE}
+mean = 100
+sd = 15
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(50,75)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+- ***Task 2:*** Calculate the probability of observing a person with an IQ *above* 75 corresponding to the area shaded in the plot below. Remember the entire area underneth the curve sums to 1 (100%).
+
+```{r echo=FALSE}
+mean = 100
+sd = 15
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(75, 150)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+
+- ***Task 3:*** Calculate the probability of observing a person with an IQ between 95 and 110 corresponding to the area shaded in the plot below. 
+
+As an example, here is the probability of observing a person with an IQ between 75 and 95
+
+```{r}
+pnorm(95, mean = mean, sd = sd) - pnorm(75, mean = mean, sd = sd)
+```
+
+which is the probability of observing a person with an IQ of 95
+
+```{r}
+pnorm(95, mean = mean, sd = sd)
+```
+
+but removing the probability of observing a person with an IQ below 75
+
+```{r}
+pnorm(75, mean = mean, sd = sd)
+```
+
+
+
+
+
+```{r echo=FALSE}
+mean = 100
+sd = 15
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(95, 110)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+- ***Task 4:*** Calculate the probability of observing a person with an IQ between 99.9 and 100.1 corresponding to the area shaded in the plot below. 
+
+```{r echo=FALSE}
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(99.9, 101)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+
+```{r}
+#pnorm(100.1, mean = mean, sd = sd) - pnorm(99.9, mean = mean, sd = sd)
+```
+
+Notice that even though the population mean is 100, the likelihood of observing a person with an IQ between 99.9 and 100.1 is almost 0 (0.5%). This is a property of continuous distributions; the probability of observing a specific value is going toward 0. 
+
+
+- ***Task 5:*** Calculate the probability of observing a person with an IQ of 60 or below or 140 and above corresponding to the area shaded in the plot below. 
+
+```{r echo=FALSE}
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(50, 60)) +
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(140, 150)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+
+# Central limit theorem
+
+We know that the central limit theorem works if the samples approaches infinity (or is at least large enough) and the samples and independent and identially distributed (iid; see lecture). The central limit theorem states that the sampling distribution will approach normality when the sample size increase, **regardless of the shape of the distribution we are sampling from**.
+
+
+```{r}
+# infer package
+# IQ country data
+# sample
+#samples <- population %>%
+#  rep_sample_n(size = 50, reps = 1000)
+#samples
+## Compute p_hats for all 1000 samples = proportion hurricanes
+#p_hats <- samples %>%
+#  group_by(replicate) %>%
+#  summarize(prop_hurricane = mean(status == "hurricane"))
+#p_hats
+
+# Plot sampling distribution
+#ggplot(p_hats, aes(x = prop_hurricane)) +
+#  geom_density() +
+#  labs(x = "p_hat", y = "Number of samples",
+#  title = "Sampling distribution of p_hat from 1000 samples of size 50")
+
+## Linearity / continuous data
+
+```
+
+In the lecture you saw the example of IQ scores obtained from different countries [@gill2014bayesian, p. 85-86; data from @lynn2001iq].
+
+```{r}
+# Load tidyverse
+library(tidyverse)
+```
+
+
+<div style="float: left; width: 30%;">
+```{r}
+country <- read_csv("https://www.dropbox.com/s/sxul2ey3msmsvow/country.csv")
+#data <- BaM::iq %>%
+#  pivot_longer(everything()) %>%
+#  mutate(name = gsub("[.]", " ", name)) 
+
+```
+</div>
+
+
+
+# Homogeneity of variance
+
+

@@ -1,0 +1,120 @@
+---
+title: "Workshop 18: Model evaluation and violations"
+author: "Jens Roeser"
+date: "Compiled `r Sys.Date()`"
+#output: 
+#  bookdown::html_document2: default
+#  pdf_document: default
+#  ss: styles.css
+#  fig_caption: yes
+#  theme: flatly
+#  toc: no
+#  toc_depth: 1
+#  spacing: double
+#  indent: true
+bibliography: ../slides/references.bib
+csl: apa.csl
+link-citations: yes
+output:
+  rmdformats::readthedown:
+  self_contained: false
+fig_width: 2
+fig_height: 2
+thumbnails: true
+lightbox: true
+gallery: false
+highlight: "kate"
+toc_depth: 1
+use_bookdown: false
+
+---
+  
+  
+  ```{r, include=FALSE}
+library(citr) # CRTL + Shift + R for citations
+library(kableExtra)
+library(rmdformats)
+library(knitr)
+library(tidyverse)
+library(psyntur)
+set.seed(123)
+theme_set(theme_bw())
+```
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE)
+opts_knit$set(width=90)
+
+
+# Fit lm regression and anova style
+
+# Go through lecture example (continuous predict)
+
+# Give instructions for example with discrete predictor)
+
+# extracting residuals
+
+# histogram of residuals: normality
+
+# Skew and kurtosis
+
+# log transformation
+
+# plot residuals against fitted data / predictor: independent -> equality of variance / linearity
+
+
+```
+
+
+# Lecture review
+
+  - Parametric models (*t*-test, ANOVA, linear regression) make assumptions about their input (the data_.
+  - Assumptions related to the normal distribution
+    - data must be continuous
+    - observations must be independent and identically distributed 
+  - The normal distribution is assumed because of the central limit theorem
+  - Homogeneity of variance
+  - Linearity: continuous predictors must be linear
+
+# Learning outcomes 
+
+This workshop, along with the lecture on model assumptions should give you the opportunity to be able to
+
+
+
+For revision ....
+
+# Setup
+
+You need the package `psyntur`:
+
+```{r}
+library(psyntur) 
+packageVersion("psyntur") # should be version 0.0.2
+```
+
+
+# Fit two models
+
+## Model with categorical predictor
+
+## Model with continuous predictor
+
+# Residuals
+
+# Normal distribution
+
+## Continuous data
+
+## Transformation
+
+# Linearity
+
+# Homogeneity of variance
+
+
+
+# References
+
+<div id="refs"></div>
+  

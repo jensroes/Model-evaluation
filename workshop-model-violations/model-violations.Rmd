@@ -13,7 +13,7 @@ date: "Compiled `r Sys.Date()`"
 #  spacing: double
 #  indent: true
 bibliography: ../slides/references.bib
-csl: apa.csl
+csl: ../slides/apa.csl
 link-citations: yes
 output:
   rmdformats::readthedown:
@@ -29,8 +29,7 @@ use_bookdown: false
 
 ---
   
-  
-  ```{r, include=FALSE}
+```{r, include=FALSE}
 library(citr) # CRTL + Shift + R for citations
 library(kableExtra)
 library(rmdformats)
@@ -68,13 +67,13 @@ opts_knit$set(width=90)
 
 # Lecture review
 
-  - Parametric models (*t*-test, ANOVA, linear regression) make assumptions about their input (the data_.
-  - Assumptions related to the normal distribution
-    - data must be continuous
-    - observations must be independent and identically distributed 
-  - The normal distribution is assumed because of the central limit theorem
-  - Homogeneity of variance
-  - Linearity: continuous predictors must be linear
+  - Parametric models (*t*-test, ANOVA, linear regression) make assumptions about their input (the data).
+  - Remember **LINE**:
+    - Linearity: for models with continuous predictors
+    - Independence
+    - Normality
+    - Equality of variance
+  
 
 # Learning outcomes 
 
@@ -82,7 +81,13 @@ This workshop, along with the lecture on model assumptions should give you the o
 
 
 
-For revision ....
+First we will recap the main bits of the evaluation presented in the lecture.
+
+Then, you will have the opportunity to reproduce the evaluation on the *ANOVA*-style model.
+
+
+For revision see @faraway2014linear chapter 6 (with R code) or @fox2018r chapter 8.1 -- 8.5 (with R code). Also check out [this walkthrough](http://www.sthda.com/english/articles/39-regression-model-diagnostics/161-linear-regression-assumptions-and-diagnostics-in-r-essentials/), [this online chapter](http://www2.compute.dtu.dk/courses/02429/enotepdfs/eNote-6.pdf), and [Chapter 12.3 here](https://ademos.people.uic.edu/Chapter12.html#2_regression_assumptions).
+
 
 # Setup
 
@@ -93,10 +98,31 @@ library(psyntur)
 packageVersion("psyntur") # should be version 0.0.2
 ```
 
+Also these two packages:
+
+```{r}
+#install.packages("moments")
+library(moments)
+#install.packages("tidyverse")
+library(tidyverse)
+```
+
+
+Read in data
+
+We will use the data presented during the lecture taken from @blomkvist2017reference. The data are average reaction time (rt) data to assess cognitive performance through adolescence and adulthood in a real world task; i.e. playing StarCraft II. We will focus on rts from the dominant hand and age coded as continous variable (`age` in years), as categorical variable with two (`age_2`) and three (`age_3`) levels.
+
+```{r}
+data <- read_csv("https://tinyurl.com/y3lj4696")
+```
+```{r}
+glimpse(data)
+```
+
 
 # Fit two models
 
-## Model with categorical predictor
+## Model with categorical predictor (3 groups)
 
 ## Model with continuous predictor
 
@@ -106,12 +132,17 @@ packageVersion("psyntur") # should be version 0.0.2
 
 ## Continuous data
 
+### Skewness
+
+### Kurtosis
+
 ## Transformation
 
 # Linearity
 
-# Homogeneity of variance
+# Equality of variance
 
+Equality of variance (also homogeneity)
 
 
 # References

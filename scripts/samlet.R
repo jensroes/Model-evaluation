@@ -1,7 +1,7 @@
 library(tidyverse)
 library(readxl)
 
-data <- read_xlsx("data/samlet.xlsx") %>%
+data <- read_xlsx("zzz/data/samlet.xlsx") %>%
   select(ID, Age, "RTH-D") %>% # RT hand / feet / selected dominant hand
   rename(id = ID, age = Age, rt = `RTH-D`) %>%
   mutate(age_2 = cut(age, breaks = 2, labels = c("young-ish", "old-ish")),

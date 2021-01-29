@@ -38,11 +38,8 @@ knitr::opts_chunk$set(echo = FALSE,
                       message =FALSE)
 
 theme_set(theme_classic(base_size = 16) +
-            theme(panel.grid = element_line(colour = "grey95"),
-                  panel.background = element_rect(fill = "transparent")))
-
-# Note assumptions of t, test, ANOVA etc (normality, linearly, skew, kurtosis) and how to check for them and what it means for the results if they aren't met [are results still reliable? Maybe find example of paper that has incorrectly used a model and ask if students should trust findings]. Try to get students to critically evaluate the application of statistics models.)
-
+          theme(panel.grid = element_line(colour = "grey95"),
+                panel.background = element_rect(fill = "transparent")))
 ```
 
 

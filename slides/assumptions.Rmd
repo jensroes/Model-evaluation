@@ -30,7 +30,7 @@ knitr::opts_chunk$set(echo = FALSE,
                       warning = FALSE,
                       message =FALSE)
 
-theme_set(theme_classic(base_size = 22) +
+theme_set(theme_classic(base_size = 20) +
             theme(panel.grid = element_line(colour = "grey95")))
 
 # Note assumptions of t, test, ANOVA etc (normality, linearly, skew, kurtosis) and how to check for them and what it means for the results if they aren't met [are results still reliable? Maybe find example of paper that has incorrectly used a model and ask if students should trust findings]. Try to get students to critically evaluate the application of statistics models.)
@@ -51,27 +51,33 @@ theme_set(theme_classic(base_size = 22) +
 After completing this lecture, the workshop and your own reading you should be able to ...
 </div>
 
-- name the properties of the normal distribution
-- explain the core assumptions of parametric tests
-- describe the essence of the central limit theorem
+- name the properties of the normal distribution,
+- explain the core assumptions of parametric tests,
+- and describe the essence of the central limit theorem.
+
+# Model assumptions {data-transition="fade-out"}
+
+## Reminder 1 {data-transition="fade-in fade-out"}
+
+<div style="font-size:1.8em; ">
+Models are approximations of reality focusing on practically relevant aspects.
+</div>
+
+![](pics/ubahn.png){width=75%}
 
 
-# Model assumptions 
+
+## Reminder 2 {data-transition="fade-in fade-out"}
 
 <div style="font-size:1.8em; ">
 "All models are wrong, but some are useful." -- George Box
 </div>
 
+- Help us to understand a complex matter.
+- Ideally we want to be able to assess limitations to their usefulness.
 
-## (Statistical) Models
 
-<div style="font-size:1.8em; ">
-... are approximations of reality by reducing the complexity.
-</div>
-
-![](pics/ubahn.png){width=80%}
-
-## (Statistical) Models are also machines
+## (Statistical) Models are also machines {data-transition="fade-in fade-out"}
 
 <div style="font-size:1.5em; ">
 Rube-Goldberg machine: a machine intentionally designed to perform a simple task in an overly complicated way.
@@ -80,7 +86,8 @@ Rube-Goldberg machine: a machine intentionally designed to perform a simple task
 ![](pics/rubegoldbergnapkin.jpeg){width=50%}
 
 
-## Why are the model assumptions important? 
+
+## Why are the model assumptions important? {data-transition="fade-in"}
 
 <div style="float: left; width: 40%;">
 ![](pics/machine.png){width=100%}
@@ -98,14 +105,15 @@ Rube-Goldberg machine: a machine intentionally designed to perform a simple task
 
 
 
-## What is a parametric model? {.build}
+## What is a parametric model? {data-transition="fade-out"}
 
-- A family of probability distributions with a finite number of parameters (knobs on our machine).
+- A family of probability distributions with a finite number of parameters.
 - E.g. normal distribution has two parameters: mean and standard deviation
 - Normal distribution is entailed in *t*-test, ANOVA, linear regression
+- Those models make parametric assumptions about their input.
 - Non-parametric models do not make the same assumptions: e.g. Chi-squared [$\chi^2$] test, Mann Whitney U test, Spearman's rank correlation
 
-## What do parametric models assume? 
+## What do parametric models assume? {data-transition="fade-in fade-out"}
 
 - All parametric models make the same assumptions about their input.
 - Normal distribution is at the heart of parametric models
@@ -117,7 +125,7 @@ Rube-Goldberg machine: a machine intentionally designed to perform a simple task
 - Linearity (for continuous predictors in regression models)
 
 
-## What do parametric models assume? 
+## What do parametric models assume? {data-transition="fade-in"}
   
   - **L**inearity 
   - **I**ndependence
@@ -155,7 +163,7 @@ ggplot(df, aes(x = PF)) +
 </div>
 
 
-## Density plot {data-transition="fade-in fade-out"}
+## Density plots {data-transition="fade-in fade-out"}
 
 <div style="float: left; width: 45%;">
 
@@ -258,14 +266,15 @@ M2 = paste0("Mean=", mean2, ", SD=",sd2)
 M3 = paste0("Mean=", mean3, ", SD=",sd3)
 
 ggplot(data = NULL, aes(plot_range)) +
-  stat_function(fun = dnorm, n = 101, size = 1.5,
+  stat_function(fun = dnorm, n = 101, size = 1,
                 args = list(mean = mean, sd = sd), 
                 aes(colour = M1, linetype = M1)) + 
   labs(y = "Density", x = "x", color = "Legend", linetype = "Legend") +
+  theme_classic(base_size = 16) +
   theme(legend.justification = "top",
         legend.key.width = unit(1, "cm")) +
   scale_colour_manual(values = "firebrick") +
-  scale_linetype_manual(values = "solid")
+  scale_linetype_manual(values = "solid") 
 ```
 
 
@@ -273,13 +282,14 @@ ggplot(data = NULL, aes(plot_range)) +
 
 ```{r fig.height=4}
 ggplot(data = NULL, aes(plot_range)) +
-  stat_function(fun = dnorm, n = 101, size = 1.5,
+  stat_function(fun = dnorm, n = 101, size = 1,
                 args = list(mean = mean, sd = sd), 
                 aes(colour = M1, linetype = M1)) + 
-  stat_function(fun = dnorm, n = 101, size = 1.5,
+  stat_function(fun = dnorm, n = 101, size = 1,
                 args = list(mean = mean2, sd = sd2), 
                 aes(colour = M2, linetype = M2)) + 
   labs(y = "Density", x = "x", color = "Legend", linetype = "Legend") +
+  theme_classic(base_size = 16) +
   theme(legend.justification = "top",
         legend.key.width = unit(1, "cm")) +
   scale_colour_manual(values = c("firebrick", "blue")) +
@@ -292,16 +302,17 @@ ggplot(data = NULL, aes(plot_range)) +
 
 ```{r fig.height=4}
 ggplot(data = NULL, aes(plot_range)) +
-  stat_function(fun = dnorm, n = 101, size = 1.5,
+  stat_function(fun = dnorm, n = 101, size = 1,
                 args = list(mean = mean, sd = sd), 
                 aes(colour = M1, linetype = M1)) + 
-  stat_function(fun = dnorm, n = 101, size = 1.5,
+  stat_function(fun = dnorm, n = 101, size = 1,
                 args = list(mean = mean2, sd = sd2), 
                 aes(colour = M2, linetype = M2)) + 
-  stat_function(fun = dnorm, n = 101, size = 1.5,
+  stat_function(fun = dnorm, n = 101, size = 1,
                 args = list(mean = mean3, sd = sd3), 
                 aes(colour = M3, linetype = M3)) + 
   labs(y = "Density", x = "x", color = "Legend", linetype = "Legend") +
+  theme_classic(base_size = 16) +
   theme(legend.justification = "top",
         legend.key.width = unit(1, "cm")) +
   scale_colour_manual(values = c("firebrick", "blue", "forestgreen")) +
@@ -325,6 +336,7 @@ ggplot(data = NULL, aes(plot_range)) +
 
 <div style="float: right; width: 50%;">
   - y is defined for every value of x
+  - Ranges from -$\infty$ to +$\infty$
   - Non-continuous (discrete): binary outcomes, count data, ordinal, psychometric scales
 </div>
 
@@ -412,7 +424,7 @@ ggplot(data = NULL, aes(plot_range)) +
 
 
 
-## Example: intelligence quotient
+## Example: intelligence quotient {data-transition="fade-out"}
 
 <div style="float: left; width: 45%;">
 
@@ -433,8 +445,9 @@ ggplot(data = NULL, aes(IQrange)) +
 </div>
 
 <div style="float: right; width: 50%;">
+- Normal distribution in practice.
 - Total score of standardised tests to assess human intelligence
-- Population values defined: mean = 100, SD = 15
+- Defined as normal distributed with population values mean = 100, SD = 15
 - $\sim$ 2/3 between 85 and 115
 - 2.5% $>$ 130 (gifted)
 - 2.5% $<$ 70 (impaired)
@@ -447,7 +460,7 @@ ggplot(data = NULL, aes(IQrange)) +
 # Compare to data below
 ```
 
-## Example: IQ
+## Example: IQ {data-transition="fade-in fade-out"}
 
 <div style="float: left; width: 45%;">
 
@@ -475,7 +488,7 @@ ggplot(data = NULL, aes(IQrange)) +
 
 
 
-## Example: IQ {data-transition="fade-out"}
+## Example: IQ {data-transition="fade-out fade-in"}
 
 
 <div style="float: left; width: 30%;">
@@ -491,13 +504,11 @@ data %>% arrange(desc(value)) %>% slice(1:8) %>%
 </div>
 
 <div style="float: right; width: 60%;">
-- Standard IQ test measures intelligence and reasoning (mean = 100, SD = 15)
-- Economic and cultural biases 
-- Mean IQ scores from 80 countries; each value is a mean of totals (country mean of ppt totals)
-- Taken from @gill2014bayesian [p. 85-86; data from @lynn2001iq]
+- In practice the IQ test might be biased economically and culturally
+- IQ scores from 80 countries taken from @gill2014bayesian [p. 85-86; data from @lynn2001iq]
 </div>
 
-## Example: IQ {data-transition="fade-in fade-out"}
+## Example: IQ {data-transition="fade-in"}
 
 <div style="float: left; width: 30%;">
 ```{r}
@@ -510,7 +521,7 @@ data %>% arrange(desc(value)) %>% slice(1:8) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), font_size = 20) 
 ```
 </div>
-
+  
 <div style="float: right; width: 30%;">
 ```{r}
 data <- BaM::iq %>%
@@ -524,95 +535,8 @@ data %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), font_size = 20) 
 ```
 </div>
-
-
-
-## Example: IQ
-
-```{r fig.height=5}
-data %>% 
-  mutate(name = paste0(name, "\nIQ: ", value)) %>%  
-  mutate(name = ifelse(!grepl("King", name), "", name)) %>%
-  ggplot(aes(x = value, label = name)) +
-  geom_histogram(binwidth = 5) +
-  geom_text(aes(y = 10, x = value + 35), size = 5) +
-  geom_segment(aes(x = filter(data, grepl("United Kingdom", name)) %>% pull(value), y = 6, xend = 124, yend = 8.75),
-               arrow = arrow(length = unit(10, "mm"), ends = "first"),colour = "darkred") +
-  scale_x_continuous(limits = c(30, 160), breaks = seq(20, 160, 20)) +
-  stat_function(fun = function(x) dnorm(x, mean = IQmean, sd = IQsd) * 80 * 8,
-    color = "darkred", size = 1) +
-  labs(y = "Counts", x = "National IQ")
-
-```
-
-## Simulation {data-transition="fade-out"}
-
-<div style="float: left; width: 45%;">
-```{r out.width="100%", fig.height=7}
-reps <- replicate(2000, sample(data$value, 30, replace = T) %>% mean())
-ggplot(NULL, aes(x = reps)) +
-#  geom_histogram(binwidth = 1) +
-  scale_x_continuous(limits = c(75, 125)) +
-  scale_y_continuous(limits = c(0, 400)) +
-  labs(y = "Counts", x = "National IQ") +
-  geom_vline(xintercept = 100, linetype = "dashed", colour = "darkred", size = 1)
-
-```
-</div>
-
-<div style="float: right; width: 50%;">
-- Is the IQ test economic / cultural biased?
-- Difficult to replicate this study
-</div>
-
-
-## Simulation {data-transition="fade-in fade-out"}
-
-<div style="float: left; width: 45%;">
-```{r out.width="100%", fig.height=7}
-reps <- replicate(2000, sample(data$value, 30, replace = T) %>% mean())
-ggplot(NULL, aes(x = reps)) +
-#  geom_histogram(binwidth = 1) +
-  scale_x_continuous(limits = c(75, 125)) +
-  scale_y_continuous(limits = c(0, 400)) +
-  labs(y = "Counts", x = "National IQ") +
-  geom_vline(xintercept = 100, linetype = "dashed", colour = "darkred", size = 1)
-
-```
-</div>
-
-<div style="float: right; width: 50%;">
-- So here is a quick simulation to redo this experiment 2,000 times 
-  - Sample 30 countries from data
-  - Calculate sample mean across sampled countries
-  - Repeat 2,000 times
-  - Sampling distribution (week 6)
-</div>
-
-
-## Simulation {data-transition="fade-in"}
-
-<div style="float: left; width: 45%;">
-```{r out.width="100%", fig.height=7}
-reps <- replicate(2000, sample(data$value, 30, replace = T) %>% mean())
-ggplot(NULL, aes(x = reps)) +
-  geom_histogram(binwidth = 1) +
-  scale_x_continuous(limits = c(75, 125)) +
-  scale_y_continuous(limits = c(0, 400)) +
-  labs(y = "Counts", x = "National IQ") +
-  geom_vline(xintercept = 100, linetype = "dashed", colour = "darkred", size = 1)
-
-```
-</div>
-
-<div style="float: right; width: 45%;">
-- Notice that this distribution is normal.
-- Given these results, countries with an average IQ of 100 would be outliers.
-- We will see how and why this works later ...
-</div>
-
-
-
+  
+  
 
 
 
@@ -668,49 +592,45 @@ Source: @robinson2018using
 ![](pics/wiseguy.png){width=80%}  
 </div>
 
-<div style="float: right; width: 55%;">
+<div style="float: right; width: 55%; font-size:.8em;">
 - Strictly speaking, nothing is really normal distributed.
 - Most variables have an upper and lower bound, e.g., people can't be fast than 0 secs or smaller than 0 inch.
 - All observations are discrete in practice due to limitations of our measuring instruments.
 - However, a normal distribution is often suitable for practical considerations.
+- So we typically want data to be distributed **approximately** normal.
 </div>
 
 
 
-## Normal distribution
+## Interim summary
 
 - Parametric models assume that the data are normal distributed.
-- We **know** IQ is normal distributed but our example didn't look normal at all.
-- In fact, many methods psychologists obtain non-normal distributed data.  
+- However, psychologists often obtain non-normal distributed data.  
 - Why do we bother with the normal distribution?
-- We will see in the following that the data don't need to be normal distributed at all.
+- We will see in the following that the data don't need to come from a normal distribution at all.
 - The reason is the **central limit theorem**.
 
 
 ## Recap questions 
 
-- What is a parametric model: example, definition?
+- What is a parametric model?
 - What are the assumptions of parametric models?
-- What might be the consequence of model violations?
 - What are the properties of the normal distribution?
 - What are the properties of a continuous variable?
-- Why are psychometric scales (often) not continuous?
+- Why are psychometric data (often) not continuous / normal distributed?
 
 
 
 
-# Central limit theorem (CLT)
-
-
-## Central limit theorem (CLT)
+# Central limit theorem (CLT) {data-transition="fade-out"}
 
 - The sampling distribution will be approximately normal for large sample sizes, regardless of the (type / shape of the) distribution which we are sampling from.
-- We can use parametric statistical inference even if we are sampling from a population that is weird (i.e. not normal distributed), if our sample size is large enough.
+- We can use parametric statistical inference even if we are sampling from a population that is weird (i.e. not normal distributed).
 - From week 6: mean of sampling distribution is estimate of population mean ($\mu$; Greek mu)
 - Works also for totals (e.g. IQ), SDs, etc.
-- Example for mean of depression scores.
 
-## Demo of CLT {data-transition="fade-out"}
+
+## Demo of CLT {data-transition="fade-in fade-out"}
 
 - CES-D scale: self-report depression [@radloff1977ces] 
 - 22 items to assess the degree of depression
@@ -723,13 +643,14 @@ Source: @robinson2018using
 
 ## Demo of CLT {data-transition="fade-in"}
 
-- 5-point Likert: strongly disagree (1) -- strongly agree (2)
-
 ```{r echo=T}
 N_items <- 22 # 22 items
 response_options <- 1:5 # 5-point Likert scale
 response_options
 ```
+
+- 5-point Likert: strongly disagree (1) -- strongly agree (5)
+
 
 ## Simulate one participant {data-transition="fade-out"}
 
@@ -776,7 +697,7 @@ mean(ppt_1); mean(ppt_2)
 ppts <- c(mean(ppt_1), mean(ppt_2))
 ```
 
-- The distribution of the sample will approach normality as the number of participants increases.
+- The sample distribution will approach normality as the number of participants increases.
 
 </div>
 
@@ -873,21 +794,19 @@ ppt10k_plot
 
 # Independent and identically distributed (iid) 
 
-## Independent and identically distributed (iid) 
-
-- Most fundamental assumptions for the CLT and therefore statistical tests
+- Most fundamental assumptions for the CLT and therefore statistical tests.
 - Sampling / obtaining of the data.
 - Sample is iid if each observation comes from the same distribution as the others and all observations are mutually independent. 
 
 
-## Independence
+## Independence {data-transition="fade-out"}
 
 - One observation must be unrelated from the next.
 - Assessing the spread of COVID infections: sample **only one** person per house hold
 
 ![Network example](pics/network.png){width=70%}  
 
-## Independence
+## Independence {data-transition="fade-in"}
 
 <div style="float: left; width: 42%; font-size:.8em; ">
 - Self-report depression
@@ -912,11 +831,11 @@ ppt10k_plot
 #- prevelance would be higher in one household than on a city, county, country level
 ```
 
-## Identical distribution
+## Identical distribution {data-transition="fade-out"}
 
 <div style="float: left; width: 50%;">
 - Observations must come from the same distribution 
-- or family of distributions: e.g. normal, Poisson (discrete count data), binomial (binary data)
+- or family of distributions: e.g. normal, count, ordinal, binary
 - Depression example: 22 items about depression, all 5-point Likert scale
 
 </div>
@@ -927,7 +846,7 @@ ppt1_plot + labs(title = "")
 ```
 </div>
 
-## Identical distribution
+## Identical distribution {data-transition="fade-in fade-out"}
 
 <div style="float: left; width: 50%;">
 - Violation: 
@@ -943,7 +862,7 @@ ppt1_plot + labs(title = "")
 ```
 </div>
 
-## Identical distribution
+## Identical distribution {data-transition="fade-in"}
 
 <div style="float: left; width: 50%;">
 - Self-report depression items
@@ -999,9 +918,9 @@ ppt1_plot + labs(title = "")
 
 ## Recap questions 
 
-- Why is sample size important in the context of model assumptions?
 - What is the role of the CLT in the context of normal distributions?
 - What is iid?
+- Why is sample size important in the context of model assumptions?
 
 
 # Epilogue
@@ -1013,9 +932,9 @@ ppt1_plot + labs(title = "")
 - Normal distribution is in the centre of parametric models.
 - The normal distribution can be characterised using a range of properties.
 - Requirements for normal distribution:
-  - large enough sample 
+  - large enough sample (CLT applies)
   - independent and identically distributed
-- Because of CLT, we will arrive at a normal distribution if sample is large enough regardless of the shape of the distribution we're sampling from.
+
 
 
 ## Useful textbook resources
@@ -1030,8 +949,8 @@ ppt1_plot + labs(title = "")
 
 ## Outlook
 
-- Model assumptions: workshop task on normal distribution and CLT
-- Model evaluation and violations
+- Workshop on normal distribution and CLT
+- Model evaluation and violations (lecture + workshop)
 
 
 ## References

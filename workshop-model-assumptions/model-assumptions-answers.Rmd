@@ -1,0 +1,566 @@
+---
+title: "Workshop 17 [Week 7]: Model assumptions"
+author: "Jens Roeser"
+date: "Compiled `r Sys.Date()`"
+bibliography: ../slides/references.bib
+csl: ../slides/apa.csl
+link-citations: yes
+output:
+  rmdformats::readthedown:
+  self_contained: false
+#fig_width: 10
+#fig_height: 5
+thumbnails: true
+lightbox: true
+gallery: false
+highlight: "kate"
+toc_depth: 1
+use_bookdown: false
+
+---
+
+```{r, include=FALSE}
+library(citr) # CRTL + Shift + R for citations
+library(kableExtra)
+library(rmdformats)
+library(knitr)
+library(tidyverse)
+library(psyntur)
+set.seed(123)
+theme_set(theme_classic(base_size = 20))
+```
+
+```{r setup, include=FALSE}
+opts_chunk$set(fig.width = 4, fig.asp = 1)
+opts_knit$set(width=90)
+knitr::opts_chunk$set(echo = TRUE,
+                      comment=NA, 
+                      warning = FALSE,
+                      message =FALSE)
+```
+
+
+# Lecture review
+
+  - Parametric models (*t*-test, ANOVA, linear regression) make assumptions about their input (the data).
+  - Assumptions relate to the normal distribution
+    - data must be continuous
+    - observations must be independent and identically distributed 
+  - The normal distribution is assumed because of the central limit theorem
+
+
+# Learning outcomes 
+
+This workshop, along with the lecture on model assumptions should give you the opportunity to be able to
+
+  - name central properties and aspects of the normal distribution.
+  - understand the conceptual idea of the central limit theorem.
+  - use basic simulations in R to understand both.
+
+For revision of central limit theorem and normal distribution see @matloff2019probability chapter 9.7 and @baguley2012serious chapter 2.4.1
+
+# Setup
+
+You need the package `psyntur`:
+
+```{r}
+library(psyntur) 
+packageVersion("psyntur") # should be version 0.0.2
+```
+
+
+# Normal distribution 
+
+To draw out a normal distribution, all we need to know its mean and its standard deviation.
+
+
+## Simulate normal distributed data  {.tabset .tabset-fade .tabset-pills}
+
+The function `rnorm` (*r*=random, *norm*=normal) allows us to randomly sample normal distributed data. The function takes three parameter values, i.e. the number of samples *n*, the *mean*, and the standard deviation *sd*.
+
+### 1. Create random data
+
+Create random distributed data:
+
+```{r}
+n <- 5 # Number of obervations to be sampled.
+mean <- 500 # True population mean of the distribution. 
+sd <- 100 # True population sd of the distributions
+x <- rnorm(n = n, mean = mean, sd = sd)
+```
+
+You won't have the same values. Every time you use `rnorm` you will get new values (i.e. magic). Check the randomly sampled observations by typing `x` and Return in the R console. 
+
+```{r}
+x # Tada, 5 random values
+```
+
+### 2. Why fake data?
+
+Functions like `rnorm` allow us to control population parameters. In reality we rarely know the population mean, say, the average time it takes to recover from COVID, but we can estimate it from a large enough sample and repeated sampling from the population. These unknown population parameters are conventionally indicated with Greek letters, i.e. called $\mu$ (mu; the population mean) and $\sigma$ (sigma; the population standard deviation). 
+
+Because we don't know the population parameters in real life, functions like `rnorm` are great. We can simulate data of which we **do** know the parameter values, because we defined both above (i.e. `mean`, `sd`).
+
+
+### 3. Plot the data
+
+Plot the "fake" data from above.
+
+```{r }
+histogram(x, data = NULL)
+```
+
+Here are the mean of the sample:
+
+```{r}
+mean(x)
+```
+
+and the standard deviation of the sample:
+
+```{r}
+sd(x)
+```
+
+Note, your values will be slightly different from mine because we take random samples.
+
+
+## Questions {.tabset .tabset-fade .tabset-pills}
+
+### 1. Question
+
+Are these data in the histogram normal distributed? Why do you think they are (or are not) normal distributed?
+
+**Answer:** In theory yes (we know that `rnorm` is generating normal distributed data); in practice no, the distribution of the data is almost uniform. Reasons: the plot doesn't show the characteristic bell curve because the sample was very small (*n*=`r n`).
+
+### 2. Question 
+
+Compare the sample mean and the sample standard deviation to our population mean and population variance. Are they different? Remember, we are in the almost unique situation to know the population parameters. Why do you think are the sample mean and standard deviation different from the population mean and standard deviation?
+
+**Answer:** The sample mean and standard deviation are different from their population values. They are different because our sample was not normal distributed / sample was too small (*n*=`r n`).
+
+
+
+## Tasks {.tabset .tabset-fade .tabset-pills}
+
+### 1. Task 
+
+Create a histogram with sample size *n=*1000. Run the code. What changes did you make in the code? How has the histogram changed? Calculate the sample mean and sd again. How did they change?
+
+### 2. Task 
+
+Create a histogram with sample size *n=*1000 and a *sd* of 10. What changes did you make in the code? How has the histogram changed? Calculate the sample mean and sd again. How did they change?
+
+### 3. Task 
+
+If we know the population mean and population variance, we know everything we need to know to create data we would be expected under the normal distribution. Let's do this for IQ which has a population mean of 100 and a population sd of 15. Use an *n* of 1000 samples and plot a histogram of IQ.
+
+
+# The area under the curve
+
+Let's continue with the IQ example from the lecture. We know the population values, which is extremely handy. Here is a density plot of IQ with a mean of 100 and a sd of 15. This should look similar to your plot from task 3. Except instead of counts / frequency, the density plot describes the relative likelihood of IQ values.
+
+
+```{r echo=FALSE}
+mean = 100
+sd = 15
+plot_range <- seq(50,150,2)
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5) +
+  labs(y = "Density", x = "IQ") 
+```
+
+Remember, the area underneath the curve must sum to 1. In other words the likelihood of an observation to take on an IQ of any value under the curve is 1 (or 100%). The likelihood of a value to be outside this area is > 0 (%). Those are the extremes. 
+
+We can now use the `pnorm` (probability normal) function to calculate the area underneath the curve. You might have done calculus and integral calculations in school. No worries, we won't go there :)
+
+Again, we take the population means of IQ.
+
+```{r}
+mean <- 100
+sd <- 15
+```
+
+
+Say we want to know the probability of observing a person with an IQ **below** 100 which is the red shaded area in the density plot:
+
+```{r echo=FALSE}
+mean = 100
+sd = 15
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(50,100)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+
+The probability of observing a person with an IQ **below** 100 can be determined like this:
+
+```{r}
+pnorm(100, mean = mean, sd = sd)
+```
+
+In other words, 50% (0.5) of the population have an IQ below 100.
+
+
+
+## Tasks {.tabset .tabset-fade .tabset-pills}
+
+### 1. Task 
+
+Calculate the probability of observing a person with an IQ below 75 corresponding to the area shaded in this plot:
+
+
+
+```{r echo=FALSE}
+mean = 100
+sd = 15
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(50,75)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+```{r}
+pnorm(75, mean = mean, sd = sd) # Answer
+```
+
+
+### 2. Task 
+
+Calculate the probability of observing a person with an IQ *above* 75 corresponding to the area shaded in the plot below. Remember the entire area underneath the curve sums to 1 (100%).
+
+```{r echo=FALSE}
+mean = 100
+sd = 15
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(75, 150)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+
+```{r}
+1 - pnorm(75, mean = mean, sd = sd) # Answer: we can us 1-pnorm() because the area under the curve sums to 1 
+```
+
+
+### 3. Task 
+
+Calculate the probability of observing a person with an IQ between 95 and 110 corresponding to the area shaded in the plot below. 
+
+
+```{r echo=FALSE}
+mean = 100
+sd = 15
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(95, 110)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+
+As an example, here is the probability of observing a person with an IQ between 75 and 95
+
+```{r}
+pnorm(95, mean = mean, sd = sd) - pnorm(75, mean = mean, sd = sd)
+```
+
+which is the probability of observing a person with an IQ below 95
+
+```{r}
+pnorm(95, mean = mean, sd = sd)
+```
+
+but removing the probability of observing a person with an IQ below 75
+
+```{r}
+pnorm(75, mean = mean, sd = sd)
+```
+
+```{r}
+pnorm(110, mean = mean, sd = sd) - pnorm(95, mean = mean, sd = sd) # answer
+```
+
+
+### 4. Task 
+
+Calculate the probability of observing a person with an IQ between 99.9 and 100.1 corresponding to the area shaded in the plot below. 
+
+```{r echo=FALSE}
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(99.9, 101)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+
+```{r}
+pnorm(100.1, mean = mean, sd = sd) - pnorm(99.9, mean = mean, sd = sd) # Answer
+```
+
+Notice that even though the population mean is 100, the likelihood of observing a person with an IQ between 99.9 and 100.1 is almost 0 (0.5%). This is a property of continuous distributions; the probability of observing a specific value like exactly 100 is leaning towards 0 (i.e. almost impossible).  
+
+
+### 5. Task   
+
+Calculate the probability of observing a person with an IQ of below 60 or above 140; see the area shaded in the plot. 
+
+
+```{r echo=FALSE}
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(50, 60)) +
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(140, 150)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+
+```{r}
+pnorm(60, mean = mean, sd = sd) + (1 - pnorm(140, mean = mean, sd = sd)) # Answer
+```
+
+
+### 6. Task (bonus)  
+
+Calculate the probability of observing a person with an IQ outside of one standard deviation around the mean (see plot). Reminder the population mean of IQ is 100 and its standard deviation is 15.
+
+```{r}
+# This works because the normal distribution is symmetric.
+2 * pnorm(mean - sd, mean = mean, sd = sd) # answer
+```
+
+```{r echo=FALSE}
+ggplot(data = NULL, aes(plot_range)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(50, mean-sd)) +
+  geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
+            fill = "firebrick", alpha = .5, xlim = c(mean + sd, 150)) +
+  labs(y = "Density", x = "IQ") 
+```
+
+
+
+
+# Central limit theorem
+
+The central limit theorem states that the sampling distribution will approach normality when the sample size increase, **regardless of the shape of the distribution we are sampling from**. For the central limit theorem to work, samples must be independent and identically distributed (iid; see lecture).
+
+Let's look at the depression example from the lecture. The CES-D scale for self-report depression [@radloff1977ces] contains 22 items. Say we ask participants to indicate on a 5-point Likert scale to what extent they agree with each of the 22 statements (1 = strongly disagree -- 5 = Strongly agree).
+
+- Item 1: I was bothered by things that usually don't bother me.
+- Item 2: I had a poor appetite.
+- Item 3: I did no feel like eating, even though I should have been hungry.
+- ...
+- Item 22: I didn't enjoy life.
+
+## Questions {.tabset .tabset-fade .tabset-pills}
+
+### 1. Question 
+
+What type of data are the responses to each item?
+
+**Answer:** Ordinal / categorical / nominal but not continuous.
+
+### 2. Question 
+
+Are responses to these items are normal distributed? Why (or why not)? 
+
+**Answer:** No, because 
+  
+  - ordinal responses are categorical and therefore discrete
+  - i.e. the likelihood of responses between, say, 1 and 2 is not defined.
+  - limited response options (5 categories).
+  - inherently order.
+  - response categories are not equidistant -- the psychological distance between strongly disagree and moderately disagree might be different in the head of the participant than the distance between moderately agree and strongly agree.
+
+## Simulation {.tabset .tabset-fade .tabset-pills}
+
+We will see now, why we can still use linear-regression models that assume normally distributed data, even though the data we obtain are not normal distributed.
+
+### 1. Task 
+
+First we need to define the response options available to the participant.
+
+```{r}
+# response options
+response <- 1:5 # people can only respond with a number from 1 to 5
+# Check out the vector
+response # numbers from 1 to 5 (easy)
+```
+
+We can use `sample` to take random samples from `response`. Try out; there is a $\frac{1}{5}$ chance the number you obtained is the same as mine. Do you know why?
+
+```{r}
+sample(response, size = 1) # Sample 1 random number between 1 and 5
+```
+
+What's the code for sampling 2 random numbers?
+
+
+```{r}
+sample(response, size = 2) # answer 
+```
+
+
+### 2. Task 
+
+To sample more than 5 random numbers we need to set `replace = TRUE` to allow the same number to be sample more than once (called sampling with replacement).
+
+```{r}
+sample(response, size = 6, replace = TRUE) # Sample 6 random numbers between 1 and 5
+```
+
+Remember that the depression scale above has 22 items. So if we want to simulate one participant who responds to every of the 22 items (at random), what would you need to change `size` to?
+
+```{r}
+sample(response, size = 22, replace = TRUE) # answer
+```
+
+### 3. Task 
+
+You probably worked out in Task 3 that `size` has to be 22. Lets save the result in `ppt_1`.
+
+```{r}
+ppt_1 <- sample(response, size = 22, replace = TRUE) # Simulate one participant
+``` 
+
+Let's plot these data to see how they are distributed. Use `histogram()` and set `data` to `NULL` (cause we don't use a data frame) and set `x` to `ppt_1`. Replace **xxx**s.
+
+```{r}
+# create histogram of ppt_1
+#histogram(data = NULL, x = xxx) 
+```
+
+
+```{r}
+histogram(data = NULL, x = ppt_1) # answer
+```
+
+
+
+Is this distribution normal? Why or why not?
+
+**Answer**: No the distribution is not normal for the same reasons as above (not a continuous but an ordinal variable).
+
+### 4. Task 
+
+We've seen how we can sample random data for one participant that answers all 22 depression items. Now, lets demonstrated the central limit theorem. Remember that the central limit theorem states that we will arrive at a normal distribution if our sample is approaching infinity (or a large number) regardless of the shape of the distribution we're sampling from. 
+
+We don't learn much from sampling data for one fictive participant. We can use the `replicate` function to do the same for 2 participants.
+
+```{r}
+replicate(2, sample(response, size = 22, replace = T))
+```
+
+What's the code to do the same for 10 participants?
+
+```{r}
+# replicate(10, sample(response, size = 22, replace = T)) # answer
+```
+
+Let's save the data for two participants in `two_ppts` and calculate the means for each column (i.e. participant) using `colMeans`. 
+
+```{r}
+two_ppts <- replicate(2, sample(response, size = 22, replace = T))
+two_ppts_means <- colMeans(two_ppts)
+```
+
+These are the means:
+
+```{r}
+two_ppts_means
+```
+
+Here is a histogram of two participant means:
+
+```{r}
+histogram(data = NULL, x = two_ppts_means)
+```
+
+
+This was good but still not very impressive in terms of normal distributions. Get a histogram for 10, 100 and then 1000 fictive participants. Replace **xxx** accordingly and create a histogram each time.
+
+```{r}
+# samps <- replicate(xxx, sample(response, size = 22, replace = T))
+```
+
+```{r}
+#samps_means <- colMeans(xxx)
+```
+
+```{r}
+#histogram(data = NULL, x = xxx) 
+```
+
+```{r}
+samps <- replicate(10, sample(response, size = 22, replace = T)) # answer
+```
+
+```{r}
+samps_means <- colMeans(samps) # answer
+```
+
+```{r}
+histogram(data = NULL, x = samps_means) # answer
+```
+
+```{r}
+samps <- replicate(100, sample(response, size = 22, replace = T)) # answer
+```
+
+```{r}
+samps_means <- colMeans(samps) # answer
+```
+
+```{r}
+histogram(data = NULL, x = samps_means) # answer
+```
+
+```{r}
+samps <- replicate(10000, sample(response, size = 22, replace = T)) # answer
+```
+
+
+```{r}
+samps_means <- colMeans(samps) # answer
+```
+
+```{r}
+histogram(data = NULL, x = samps_means) # answer
+```
+
+Share the plot that you think shows a normal distribution best in your Teams chat:
+
+**To share your plot:** Click on `Export` in the `Plots` panel, then `Copy to Clipboard ...` and `Copy Plot`, then go to your Teams chat, click in the chat box and click `CTRL` + `V` to insert the plot (or `CMD` + `V` on Mac).
+
+
+### 5. Task (bonus)
+
+You feel the previous task wasn't challenging enough? Try to do the same histogram of the sampling distribution again but instead of means, use total; i.e. replace `colMeans` with `colSums`. The central tendency theorem works not just for means but also for totals and even for standard deviations.
+
+
+# Summary
+
+Congratulations, you just 
+
+  - simulated normal distributed data.
+  - learned how to use means and standard deviations to calculate the likelihood of observing a range of possible values.
+  - used a simulation to create a sampling distribution from a sample of non-normal distributed data and thereby
+  - demonstrated the central limit theorem.
+
+
+# References
+
+<div id="refs"></div>
+

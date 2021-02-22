@@ -10,10 +10,7 @@ output:
     transition: convex
     background_transition: concave
     widescreen: true
-    self_contained: false
-    reveal_options:
-      slideNumber: false
-      previewLinks: true
+
 bibliography: ["references.bib"]
 csl: apa.csl
 link-citations: yes
@@ -45,25 +42,25 @@ theme_set(theme_classic(base_size = 16) +
 
 # Learning outcomes 
 
-<div style="font-size:1.8em; ">
-After completing this lecture, the workshop and your own reading you should be able to ...
+<div style="font-size:1.25em;">
+After completing this lecture, the workshop and your own reading you should be able to ... 
 </div>
 
 - explain what residuals are.
 - run regression models with categorical predictors.
-- evaluate the accuracy of a model on the basis of its unexplained variance.
+- evaluate statistical models on the basis of their unexplained (residual) variance.
 
 
 # Model evaluation 
 
-<div style="font-size:1.4em; ">
-"Models are devices that connect theories to data. A model is an instantiation of a theory [...]" [@rouder2016interplay p. 2]
+<div style="font-size:1em; ">
+> "Models are devices that connect theories to data. A model is an instantiation of a theory [...]" [@rouder2016interplay p. 2] 
 </div>
 
-- Violations of model assumptions reduce the reliability of results.
-- Possibility leading to misguiding conclusions about our data and therefore incorrect inference.
-- Models are not either correct or wrong (because of possible violations).
-- Some violations are more severe.
+
+- Violations of model assumptions reduce reliability.
+- Possibility leading to incorrect conclusions about data.
+- Violations don't render model results wrong; neither are models without violations necessarily correct.
 - Generally we need to be cautious with and conscious of violations when interpreting results.
 
 
@@ -75,21 +72,8 @@ After completing this lecture, the workshop and your own reading you should be a
 - **L**inearity (for continuous predictor variables)
 - **I**ndependence
 - **N**ormality
-- **E**qual variance (also homogeneity)
+- **E**qual of variance (also homogeneity)
 
-## Assumptions of parametric models  {data-transition="fade-in"}
-
-
-<div style="font-size:1.3em; color:red;">
-`lm(outcome ~ predictor, data)` 
-</div>
-
-- *t*-tests and *ANOVA*s can be translated into a linear model.
-- `predictor` can be 
-  - continuous 
-  - factor with two levels (*t*-test)  
-  - factor with three levels or more (*ANOVA*).
-- Models can be evaluated on the basis of their residuals.
 
 
 
@@ -151,6 +135,31 @@ data %<>% mutate(age_3 = factor(age_3, levels = unique(age_3)[c(2,3,1)], ordered
 
 
 
+
+
+# Data modelling {data-transition="fade-out"}
+
+- Use `scatterplot`, `tukeyboxplot`, and `histogram` to inspect data.
+- Use `lm` for continuous predictor (linear regression), and categorical predictors (*t*-test, *ANOVA*):
+
+<div style="font-size:1.3em; color:red;">
+> `lm(outcome ~ predictor, data)` 
+</div>
+
+## Data visualisation and modelling {data-transition="fade-in"}
+
+- LMs can be evaluated on the basis of their residuals.
+- *t*-tests and *ANOVA*s can be translated into linear models.
+- Predictor can be 
+  - continuous 
+  - factor with two levels (*t*-test)  
+  - factor with three levels or more (*ANOVA*).
+  
+<div style="font-size:1.3em; color:red;">
+> `lm(rt ~ age, data)` 
+</div>
+
+
 ## Age variable  {data-transition="fade-out"}
 
 ```{r echo=T}
@@ -183,20 +192,7 @@ unique(data$age_2) # 2 groups
 unique(data$age_3) # 3 groups
 ```
 
-## Hypothesis
 
-- Reaction times are longer (slower) for older participants.
-- In other words, older age predicts longer reaction times regardless of whether age is a continuous predictor or a categorical predictor with two (*t*-test) or three (*ANOVA*) groups.
-
-
-# Data visualisation and modelling
-
-- Use `scatterplot`, `tukeyboxplot`, and `histogram` to inspect data.
-- Use `lm` for continuous predictor (linear regression), and categorical predictors (*t*-test, *ANOVA*):
-
-<div style="font-size:1.3em; color:red;line-height: 2em;">
-`lm(rt ~ age, data = data)`
-</div>
 
 
 ## Histogram 
@@ -308,10 +304,10 @@ tidy(anova(model_3)) %>% mutate(`p.value` = ifelse(`p.value` < 0.001, "< 0.001",
 
 ## Using residuals to evaluate models:
 
-- Normality of residuals
-- Independence of residuals (remember *iid*)
-- Homogeneity of variance of residuals
 - Linearity: linear relationship between outcome and predictor(s)
+- Independence of residuals (remember *iid*)
+- Normality of residuals
+- Equality of variance of residuals
 
 
 ## Outline 
@@ -321,7 +317,22 @@ tidy(anova(model_3)) %>% mutate(`p.value` = ifelse(`p.value` < 0.001, "< 0.001",
 - Independence of residuals: equality of variance, linearity
 
 
-# What are residuals?
+## What are residuals? {data-transition="fade-out"}
+
+<div style="float: left; width: 50%;">
+
+```{r out.width="100%", fig.height=7.5}
+data$pred <- predict(model)
+data$resid <- residuals(model)
+
+ggplot(data, aes(x = age, y = pred) ) +
+  geom_line(size = 2, colour = "red") +
+  geom_point(aes(x = age, y = rt), size = 2) + 
+  theme_classic(base_size = 22) +
+  labs(y = "rt")
+```
+</div>
+
 
 ## What are residuals? {data-transition="fade-in fade-out"}
 
@@ -346,7 +357,6 @@ ggplot(data, aes(x = age, y = pred) ) +
 <div style="float: right; font-size:.8em; width: 50%;">
 - Residuals are the unexplained (residual) variance: error in the modelling results.
 - Distance between observed ($y$) and predicted rt ($\hat{y}$): $\epsilon = y - \hat{y}$
-- Some predictions are too low and other are too high.
 - The closer the residuals are to 0, the lower the prediction error.
 
 </div>
@@ -394,9 +404,7 @@ data <- mutate(data, residuals = residuals(model))
 ```
 
 
-# Normality of residuals
-
-## Normality of residuals  
+# Normality of residuals {data-transition="fade-out"}
 
 ```{r echo=T}
 # Difference between observed rt and predicted values
@@ -420,13 +428,13 @@ histogram(data, x = residuals, bins = 30) +
 </div>
 
 
-## Normality: Skewness  {data-transition="fade-in fade-out"}
+## Normality: Skewness {data-transition="fade-in fade-out"}
 
 ![](pics/skewness_b.png){width=95%, height=300px}
 
 
 - Negatively skewed: skew < -2
-- Normal: skew = 0
+- Normal: skew $\approx$ 0
 - Positively skewed: skew > 2
 
 
@@ -575,6 +583,10 @@ histogram(data = data, x = residuals_log_model, bins = 20) + theme_classic(base_
   labs(x = "residual rt of log model") 
 ```
 
+- Skewness is about *horizontal* shape of the distribution
+- Kurtosis is about *vertical* shape of the distribution
+
+
 ## Normality: Kurtosis {data-transition="fade-in fade-out"}
 
 ```{r }
@@ -631,7 +643,7 @@ kurt_data %>%
   labs(x = "x", y = "Density") +
   annotate("text", x = 1.6, y = .5,  label = "Leptokurtic (k > 3)", size = 5) +
   annotate("text", x = 2.25, y = .4,  label = "Mesokurtic (k = 3)", size = 5) +
-  geom_segment(aes(x = .3, y = .45, xend = 1, yend = .48),
+  geom_segment(aes(x = .35, y = .45, xend = 1, yend = .48),
                arrow = arrow(length = unit(3, "mm"), ends = "first"),colour = "grey40") +
   geom_segment(aes(x = .8, y = .32, xend = 1.5, yend = .38),
                arrow = arrow(length = unit(3, "mm"), ends = "first"),colour = "orange") 
@@ -653,7 +665,7 @@ kurt_plot <- kurt_data %>% ggplot(aes(x = value, colour = name)) + geom_density(
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         legend.position = "none") +
-  geom_segment(aes(x = .3, y = .45, xend = 1, yend = .48),
+  geom_segment(aes(x = .35, y = .45, xend = 1, yend = .48),
                arrow = arrow(length = unit(3, "mm"), ends = "first"),colour = "grey40") +
   geom_segment(aes(x = .8, y = .32, xend = 1.5, yend = .38),
                arrow = arrow(length = unit(3, "mm"), ends = "first"),colour = "orange") +
@@ -694,7 +706,6 @@ kurtosis(residuals(log_model))
 
 - Must be independent and identically distributed (iid)
 - Observation must be independent of previous one.
-- We can assess independence on the basis of residuals.
 - No correlation between (adjacent) residuals.
 
 ```{r}
@@ -721,11 +732,11 @@ select(data, id, age, rt, residuals) %>%
 
 - Plot residuals across ppt id, predictor, predicted data
 - What are we looking for?
-- Dependencies or patterns: 
+- Dependencies: 
   - linearity, independence violations
-  - For any predicted value, mean of residuals should be roughly 0. 
-- Constant variance (equality of variance)
-  - For any predicted value, the spread of the residuals should be about the same. 
+  - For any value on the x-axis, mean of residuals should be roughly 0. 
+- Equality of variance:
+  - For any value on the x-axis, the spread of the residuals should be about the same (constant variance). 
 
 
 ## Independence of residuals  {data-transition="fade-in fade-out"}
@@ -750,7 +761,7 @@ scatterplot(data = NULL, y = resid(log_model),
 
 
 
-## Homogeneity of variance {data-transition="fade-in fade-out"}
+## Equality of variance {data-transition="fade-in fade-out"}
 
 ```{r echo = FALSE, results=TRUE, fig.height=5}
 scatterplot(data = data, y = residuals_log_model, x = age) +
@@ -759,7 +770,7 @@ scatterplot(data = data, y = residuals_log_model, x = age) +
 ```
 
 
-## Homogeneity of variance {data-transition="fade-in fade-out"}
+## Equality of variance {data-transition="fade-in fade-out"}
   
   
 <div style="float: left; width: 50%;">
@@ -789,7 +800,6 @@ ggplot(data = NULL, aes(plot_range)) +
 </div>
   
 <div style="float: right; width: 45%; font-size:.7em;">
-- Equality of variance
 - Homogeneity (same) vs heterogeneity (different)
 - Variance = SD$^2$: deviations between observations and their mean
 - More diverse groups have a larger variance
@@ -802,7 +812,7 @@ ggplot(data = NULL, aes(plot_range)) +
 
 
 
-## Homogeneity of variance {data-transition="fade-out"}
+## Equality of variance {data-transition="fade-out"}
 
 
 ```{r fig.width=8, fig.height=4.5}
@@ -824,7 +834,7 @@ ggplot(data = NULL, aes(plot_range)) +
 ```
 
 
-## Homogeneity of variance {data-transition="fade-in fade-out"}
+## Equality of variance {data-transition="fade-in fade-out"}
   
 
 ```{r fig.width=8, fig.height=4.5}
@@ -852,7 +862,7 @@ ggplot(data = NULL, aes(plot_range)) +
 
 
   
-## Homogeneity of variance {data-transition="fade-in fade-out"}
+## Equality of variance {data-transition="fade-in fade-out"}
   
   
 
@@ -880,7 +890,7 @@ ggplot(data = NULL, aes(plot_range)) +
 ```
 
 
-## Homogeneity of variance {data-transition="fade-in fade-out"}
+## Equality of variance {data-transition="fade-in fade-out"}
 
 ```{r echo = TRUE}
 # Refit t-test style lm with log rt
@@ -900,7 +910,7 @@ tukeyboxplot(data = data, y= residuals_2, x = age_2) +
   theme_classic(base_size = 18)
 ```
 
-## Homogeneity of variance {data-transition="fade-in fade-out"}
+## Equality of variance {data-transition="fade-in fade-out"}
 
 ```{r echo = FALSE, results=TRUE, fig.height=5}
 scatterplot(data = data, y = residuals_log_model, x = age) +
@@ -908,7 +918,7 @@ scatterplot(data = data, y = residuals_log_model, x = age) +
   theme_classic(base_size = 22)
 ```
 
-## Homogeneity of variance {data-transition="fade-in"}
+## Equality of variance {data-transition="fade-in"}
 
 ```{r echo = FALSE, results=TRUE, fig.height=5}
 scatterplot(data = data, y = residuals_log_model, x = age) + 
@@ -921,8 +931,9 @@ scatterplot(data = data, y = residuals_log_model, x = age) +
 
 ## Linearity {data-transition="fade-out"}
 
-- Linear relationship between outcome (rt) and predictor (age) variable
+- Linear relationship between outcome and predictor variable
 - Relationship can be described with a straight line
+- Increase is additive.
 
 ![](pics/faraway2.png){width=100%}
 
@@ -976,6 +987,24 @@ scatterplot(data, y = residuals_log_model, x = age) +
 
 <div style="float: left; width: 45%;">
 ```{r out.width="100%", fig.height=7}
+scatterplot(data, y = residuals_log_model, x = age) +
+  geom_smooth(method = "lm", se = F, colour = "red", alphs = .5, size = 1.5) +
+  geom_smooth(method = "lm", formula = y ~ poly(x,2), se = F, colour = "red", size = 1.5, linetype = "dashed") +
+  labs(y = "residual rt of log model") +
+  theme_classic(base_size = 22)
+```
+</div>
+
+<div style="float: right; width: 50%;">
+- Linearity: mean of residuals should be 0 at any age.
+- Divided `age` into 20 equal sized bins.
+- Calculated the mean of the residuals for each bin.
+</div>
+
+## Linearity: continuous predictor {data-transition="fade-in fade-out"}
+
+<div style="float: left; width: 45%;">
+```{r out.width="100%", fig.height=7}
 max = 20
 data %>% mutate(age = as.numeric(cut(age, max))) %>% group_by(age) %>%
   summarise(M = mean(residuals_log_model)) %>%
@@ -987,12 +1016,6 @@ data %>% mutate(age = as.numeric(cut(age, max))) %>% group_by(age) %>%
   theme_classic(base_size = 22)
 
 ```
-</div>
-
-<div style="float: right; width: 50%;">
-- Linearity: mean of residuals should be 0 at any age.
-- Divided `age` into 20 equal sized bins.
-- Calculated the mean of the residuals for each bin.
 </div>
 
 
@@ -1010,24 +1033,20 @@ data %>% mutate(age = as.numeric(cut(age, max))) %>% group_by(age) %>%
 
 ## Learning outcomes {data-transition="fade-in fade-out"}
 
-<div style="font-size:1.8em; ">
-After completing this lecture, the workshop and your own reading you should be able to ...
-</div>
-
-- explain what residuals are.
-- run regression models with categorical predictors (akin to *t*-tests and *ANOVA*s).
-- evaluate the accuracy of a model on the basis of its unexplained variance.
-
+- What are residuals.
+- How do I fit regression models with categorical predictors (akin to *t*-tests and *ANOVA*s).
+- Evaluate statistical models on the basis of their unexplained variance.
+- We will get back to these three points and the @blomkvist2017reference data set in the workshop.
 
 
 ## Homework {data-transition="fade-in fade-out"}
 
 - @blomkvist2017reference performed a range of analyses.
 - The authors addressed that the rts were not normal distributed in different ways.
-- But also, they performed a *t*-test on rts without transformation.
+- But also, they performed a *t*-test on the raw rts.
 - Discuss on Teams:
   - How did the authors address the violation of normality?
-  - What could be the consequence of the normality violation for the results of the *t*-test?
+  - What could be a consequence of the normality violation for the results of their *t*-test?
 
 
 ## Useful textbook resources  {data-transition="fade-in fade-out"}

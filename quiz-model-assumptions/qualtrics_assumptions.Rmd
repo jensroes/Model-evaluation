@@ -1,0 +1,144 @@
+---
+title: "Week 16: Model-assumptions quiz [answers]"
+author: "Jens Roeser"
+date: "Compiled `r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    fig_width: 8
+    fig_height: 4
+    lightbox: true
+    gallery: false
+    highlight: "kate"
+
+---
+
+
+```{r, include=FALSE}
+library(citr) # CRTL + Shift + R for citations
+library(kableExtra)
+library(rmdformats)
+library(knitr)
+library(tidyverse)
+library(stringi)
+library(qualtRics)
+library(janitor)
+theme_set(theme_bw(base_size = 12) + 
+            theme(axis.ticks.y = element_blank()))
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      comment=NA, 
+                      warning = FALSE,
+                      message =FALSE)
+
+```
+
+
+```{r}
+questions <- c(
+  "Which statement about models is *incorrect*?",
+  "Which of these statements does *not* apply? Statistical models are machines because ...",
+  "What is a property of a parametric model? Parametric models ...",
+  "Is it true that t-tests, ANOVAs and linear regressions are all parametric models?",
+  "Discrete data can be normal distributed!",
+  "The normal distribution is symmetric.",
+  "For perfectly normal distributed data the mean, median and mode take on the same value.",
+  "The normal distribution is defined by two parameters (select two options).",
+  "Which of the following are examples for a random continuous variable?",
+  "Why are responses to psychometric scales not continuous data?",
+  
+  "What does CLT stand for?",
+  "What does the CLT show?",
+  
+  "Under what circumstance can we use parametric tests on data that come from a non-normal distribution?",
+
+  "What does iid stand for?",
+  
+  "What does independence in iid refer to?",
+  "What is an example for an independence violation?",
+  "What does identically distributed in iid mean?",
+  "What is *not* an example for a violation of an identical distribution?",
+  "Why is it important that your sample is iid? Violations of iid ...",
+
+  #  "How would you evaluate the quiz (more stars indicates endorsement)?",
+  "I found this quiz useful to understand the main aspects of the lecture.",
+  "I found the quiz too difficult.",
+  "There were too many questions.",
+  "I'd like more questions.",
+  "I didn't see how some questions related to the lecture.",
+  "Please keep using quizzes for lectures.",
+  "I feel like this quiz increased my engagement.",
+
+  "Which statement applies to you (you can respond more than once)?",
+  "Do you want to see the correct answers to this quiz?")
+
+
+file <- list.files("../data", pattern = "assumptions", full.names = T)
+d <- read_survey(file) %>% clean_names() %>% select(q3:q35) %>% drop_na() 
+question_id <- names(d)
+
+ppts <- nrow(d)
+
+d %<>% mutate_if(is.character, ~sjmisc::word_wrap(., 30)) %>%
+  mutate_all(as.character) %>%  pivot_longer(everything()) %>%
+  group_by(name, value) %>% mutate(count = n()) %>% group_by(name) %>%
+  mutate(max = max(count), highlight = count == max) %>% ungroup() %>%
+  mutate(section = "",
+         section = if_else(name %in% paste0("q",c(3:6)), "Part 1: Models and parametric tests", section),
+         section = if_else(name %in% paste0("q",c(8:14)), "Part 2: Properties of the normal distribution", section),
+         section = if_else(name %in% paste0("q",c(42,19,16)), "Part 3: CLT", section),
+         section = if_else(name %in% paste0("q",c(20:32)), "Part 4: *iid*", section),
+         section = if_else(name %in% paste0("q",c("24_1", "24_3", "24_4", "24_5", "24_7", "24_6", "24_9", 27, 35 )), "Part 5: quiz evaluation", section )) %>% arrange(section,name) %>%
+  mutate(highlight = if_else(grepl("Part 5", section), FALSE, highlight),
+         highlight = if_else(name == "q8" & value == "FALSE", TRUE,
+                             if_else(name == "q8" & value == "TRUE", TRUE, highlight)))
+
+```
+
+A total of `r ppts` students completed [this quiz](https://ntupsychology.eu.qualtrics.com/jfe/form/SV_1Y1jrmFPHJvgcbs) (status: `r Sys.time()`). The correct answers are highlighted in green in the bar plots below. If you don't understand why an answer is correct, or why an answer isn't correct, please ask on Teams. 
+
+
+```{r results="asis"}
+sec2 <- "nope"
+for(i in 1:(length(question_id))){
+  sec <- unique(d[d$name == question_id[i],]$section)
+  if(sec != sec2){
+    cat("\n") 
+    cat("## ", sec, "{.tabset .tabset-fade .tabset-pills}\n") # section headers with buttons for subsections
+    sec2 <- sec
+  }
+  
+  cat("\n") 
+  cat("### ", questions[i], "\n") # subsection headers
+  
+  if(grepl("q24", question_id[i])){
+    print(
+      
+    # Create a plot
+    d %>% filter(name == question_id[i]) %>%
+      ggplot(aes(x = value, fill = highlight)) +
+        geom_bar(alpha = .5, show.legend = F) +
+        labs(x = "Endorsement (1=low, 6=high)", y = "Frequency") + coord_flip() +
+        scale_fill_manual(values = c("FALSE" = "grey",  "TRUE" = "forestgreen"))
+    )
+  }
+  if(!grepl("q24", question_id[i])){
+    print(
+    # Create a plot
+    d %>% filter(name == question_id[i]) %>%
+      ggplot(aes(x = value, fill = highlight)) +
+        geom_bar(alpha = .5, show.legend = F) +
+        labs(x = "Answers", y = "Frequency") + coord_flip() +
+        scale_fill_manual(values = c("FALSE" = "grey",  "TRUE" = "forestgreen"))
+    )
+  }
+  
+  if(question_id[i] == "q8"){
+    cat("\n") 
+    cat("Ooops! What's going on here? To be honest, my bad, I guess. I intended the answer FALSE because discrete data itself is non-continuous / categorical and therefore is not normal distributed. However, I do see why so many answered TRUE. If you watched the entire lecture before answering the quiz you probably thought that discrete data are normal distributed under the CLT. Awesome, this shows real learning and you can be proud of yourself. So let's just agree both answers are correct here and move on :)", "\n") 
+  
+  }  
+  cat("\n")
+}
+```

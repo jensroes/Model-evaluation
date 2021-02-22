@@ -7,15 +7,11 @@ csl: ../slides/apa.csl
 link-citations: yes
 output:
   rmdformats::readthedown:
-  self_contained: false
-#fig_width: 10
-#fig_height: 5
-thumbnails: true
-lightbox: true
-gallery: false
-highlight: "kate"
-toc_depth: 1
-use_bookdown: false
+    lightbox: true
+    gallery: false
+    highlight: "kate"
+    toc_depth: 1
+    use_bookdown: false
 
 ---
 
@@ -27,7 +23,7 @@ library(knitr)
 library(tidyverse)
 library(psyntur)
 set.seed(123)
-theme_set(theme_classic(base_size = 20))
+theme_set(theme_classic(base_size = 14))
 ```
 
 ```{r setup, include=FALSE}
@@ -46,7 +42,7 @@ knitr::opts_chunk$set(echo = TRUE,
   - Assumptions relate to the normal distribution
     - data must be continuous
     - observations must be independent and identically distributed 
-  - The normal distribution is assumed because of the central limit theorem
+  - The normal distribution is assumed because of the central limit theorem.
 
 
 # Learning outcomes 
@@ -72,18 +68,18 @@ packageVersion("psyntur") # should be version 0.0.2
 
 ## Simulate normal distributed data  {.tabset .tabset-fade .tabset-pills}
 
-To draw out a normal distribution, all we need to know its mean and its standard deviation.
+To draw out a normal distribution, we need to know the mean and the standard deviation.
 
-The function `rnorm` (*r*=random, *norm*=normal) allows us to randomly sample normal distributed data. The function takes three parameter values, i.e. the number of samples *n*, the *mean*, and the standard deviation *sd*.
+The function `rnorm` (*r*=random, *norm*=normal) allows us to randomly sample normal distributed data. The function takes three parameter values: the number of samples *n* we want to obtain from a distribution with a *mean*, and a standard deviation *sd* or some sort. Go through the example revealed by Buttons 1. -- 3.
 
 ### 1. Create random data
 
 Create random distributed data:
 
 ```{r}
-n <- 5 # Number of obervations to be sampled.
-mean <- 500 # True population mean of the distribution. 
-sd <- 100 # True population sd of the distributions
+n <- 5 # Number of observations to be sampled.
+mean <- 500 # True population mean  
+sd <- 100 # True population standard deviation
 x <- rnorm(n = n, mean = mean, sd = sd)
 ```
 
@@ -95,7 +91,7 @@ x # Tada, 5 random values
 
 ### 2. Why fake data?
 
-Functions like `rnorm` allow us to control population parameters. In reality we rarely know the population mean, say, the average time it takes to recover from COVID, but we can estimate it from a large enough sample and repeated sampling from the population. These unknown population parameters are conventionally indicated with Greek letters, i.e. called $\mu$ (mu; the population mean) and $\sigma$ (sigma; the population standard deviation). 
+Functions like `rnorm` allow us to control population parameters. In reality we rarely know the population mean, say, the average time it takes to recover from COVID-19, but we can estimate it from a large enough sample and repeated sampling from the population. These unknown population parameters are conventionally indicated with Greek letters, i.e. $\mu$ (mu; the population mean) and $\sigma$ (sigma; the population standard deviation). 
 
 Because we don't know the population parameters in real life, functions like `rnorm` are great. We can simulate data of which we **do** know the parameter values, because we defined both above (i.e. `mean`, `sd`).
 
@@ -108,7 +104,7 @@ Plot the "fake" data from above.
 histogram(x, data = NULL)
 ```
 
-Here are the mean of the sample:
+Here is the mean of the sample:
 
 ```{r}
 mean(x)
@@ -120,29 +116,27 @@ and the standard deviation of the sample:
 sd(x)
 ```
 
-Note, your values will be slightly different from mine because we take random samples.
-
 
 ## Questions {.tabset .tabset-fade .tabset-pills}
 
 ### 1. Question
 
-Are these data in the histogram normal distributed? Why do you think they are (or are not) normal distributed?
+Your numbers will be different from mine because we take *random* samples. Are the data in your histogram normal distributed? Why do you think they are (or are not) normal distributed?
 
 ### 2. Question 
 
-Compare the sample mean and the sample standard deviation to our population mean and population variance. Are they different? Remember, we are in the almost unique situation to know the population parameters. Why do you think are the sample mean and standard deviation different from the population mean and standard deviation?
+Compare the sample mean and the sample standard deviation to our population mean and population standard deviation. Are they different? Remember, we are in the almost unique situation to know the population parameters. Why do you think are the sample mean and standard deviation different from the population mean and standard deviation?
 
 
 ## Tasks {.tabset .tabset-fade .tabset-pills}
 
 ### 1. Task 
 
-Create a histogram with sample size *n=*1000. Run the code. What changes did you make in the code? How has the histogram changed? Calculate the sample mean and sd again. How did they change?
+Repeat the steps above but this time create a histogram with sample size *n=*1000. What changes did you make in the code? How has the histogram changed? Calculate the sample mean and sd again. How did they change?
 
 ### 2. Task 
 
-Create a histogram with sample size *n=*1000 and a *sd* of 10. What changes did you make in the code? How has the histogram changed? Calculate the sample mean and sd again. How did they change?
+Repeat the steps above but this time with a sample size *n=*1000 and a *sd* of 10. What changes did you make in the code? How has the histogram changed? Calculate the sample mean and sd again. How did they change?
 
 ### 3. Task 
 
@@ -157,8 +151,8 @@ Let's continue with the IQ example from the lecture. We know the population valu
 ```{r echo=FALSE}
 mean = 100
 sd = 15
-plot_range <- seq(50,150,2)
-ggplot(data = NULL, aes(plot_range)) +
+plot_range <- c(50,150)
+ggplot(data = data.frame(x = plot_range), aes(x)) +
   stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
   geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
             fill = "firebrick", alpha = .5) +
@@ -169,7 +163,7 @@ Remember, the area underneath the curve must sum to 1. In other words the likeli
 
 We can now use the `pnorm` (probability normal) function to calculate the area underneath the curve. You might have done calculus and integral calculations in school. No worries, we won't go there :)
 
-Again, we take the population means of IQ.
+Again, we take the population values (mean and standard deviation) of IQ.
 
 ```{r}
 mean <- 100
@@ -182,7 +176,7 @@ Say we want to know the probability of observing a person with an IQ **below** 1
 ```{r echo=FALSE}
 mean = 100
 sd = 15
-ggplot(data = NULL, aes(plot_range)) +
+ggplot(data = data.frame(x = plot_range), aes(x)) +
   stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
   geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
             fill = "firebrick", alpha = .5, xlim = c(50,100)) +
@@ -210,7 +204,7 @@ Calculate the probability of observing a person with an IQ below 75 correspondin
 ```{r echo=FALSE}
 mean = 100
 sd = 15
-ggplot(data = NULL, aes(plot_range)) +
+ggplot(data = data.frame(x = plot_range), aes(x)) +
   stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
   geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
             fill = "firebrick", alpha = .5, xlim = c(50,75)) +
@@ -220,12 +214,14 @@ ggplot(data = NULL, aes(plot_range)) +
 
 ### 2. Task 
 
-Calculate the probability of observing a person with an IQ *above* 75 corresponding to the area shaded in the plot below. Remember the entire area underneath the curve sums to 1 (100%).
+Calculate the probability of observing a person with an IQ **above** 75 corresponding to the area shaded in the plot below. 
+
+**Hint:** Keep in mind that `pnorm` returns the probability of IQ lower than the critical value. The entire area underneath the curve sums to 1 (100%) and the distribution is symmetric. In other words you can use `1 - x` where x is the result returned from `pnorm`. Make sure you understand why :)
 
 ```{r echo=FALSE}
 mean = 100
 sd = 15
-ggplot(data = NULL, aes(plot_range)) +
+ggplot(data = data.frame(x = plot_range), aes(x)) +
   stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
   geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
             fill = "firebrick", alpha = .5, xlim = c(75, 150)) +
@@ -236,13 +232,13 @@ ggplot(data = NULL, aes(plot_range)) +
 
 ### 3. Task 
 
-Calculate the probability of observing a person with an IQ between 95 and 110 corresponding to the area shaded in the plot below. 
+Calculate the probability of observing a person with an IQ between 95 and 110 corresponding to the area shaded in the plot below. Example below.
 
 
 ```{r echo=FALSE}
 mean = 100
 sd = 15
-ggplot(data = NULL, aes(plot_range)) +
+ggplot(data = data.frame(x = plot_range), aes(x)) +
   stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
   geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
             fill = "firebrick", alpha = .5, xlim = c(95, 110)) +
@@ -275,7 +271,7 @@ pnorm(75, mean = mean, sd = sd)
 Calculate the probability of observing a person with an IQ between 99.9 and 100.1 corresponding to the area shaded in the plot below. 
 
 ```{r echo=FALSE}
-ggplot(data = NULL, aes(plot_range)) +
+ggplot(data = data.frame(x = plot_range), aes(x)) +
   stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
   geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
             fill = "firebrick", alpha = .5, xlim = c(99.9, 101)) +
@@ -290,7 +286,7 @@ Calculate the probability of observing a person with an IQ of below 60 or above 
 
 
 ```{r echo=FALSE}
-ggplot(data = NULL, aes(plot_range)) +
+ggplot(data = data.frame(x = plot_range), aes(x)) +
   stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
   geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
             fill = "firebrick", alpha = .5, xlim = c(50, 60)) +
@@ -307,7 +303,7 @@ Calculate the probability of observing a person with an IQ outside of one standa
 
 
 ```{r echo=FALSE}
-ggplot(data = NULL, aes(plot_range)) +
+ggplot(data = data.frame(x = plot_range), aes(x)) +
   stat_function(fun = dnorm, n = 101, args = list(mean = mean, sd = sd)) + 
   geom_area(stat = "function", fun = dnorm, args = list(mean = mean, sd = sd), 
             fill = "firebrick", alpha = .5, xlim = c(50, mean-sd)) +
@@ -400,9 +396,9 @@ Is this distribution normal? Why or why not?
 
 ### 4. Task 
 
-We've seen how we can sample random data for one participant that answers all 22 depression items. Now, lets demonstrated the central limit theorem. Remember that the central limit theorem states that we will arrive at a normal distribution if our sample is approaching infinity (or a large number) regardless of the shape of the distribution we're sampling from. 
+We've seen how we can sample random data for one participant that answers all 22 depression items. Now, lets demonstrated the **central limit theorem**. Remember that the central limit theorem states that we will arrive at a normal distribution if our sample is approaching infinity (or a large number) regardless of the shape of the distribution we're sampling from. 
 
-We don't learn much from sampling data for one fictive participant. We can use the `replicate` function to do the same for 2 participants.
+We don't learn much from sampling data for one hypothetical participant. We can use the `replicate` function to do the same for 2 participants.
 
 ```{r}
 replicate(2, sample(response, size = 22, replace = T))
@@ -428,7 +424,7 @@ histogram(data = NULL, x = two_ppts_means)
 ```
 
 
-This was good but still not very impressive in terms of normal distributions. Get a histogram for 10, 100 and then 1000 fictive participants. Replace **xxx** accordingly and create a histogram each time.
+This was good but still not very impressive in terms of normal distributions. Get a histogram for 10, 100 and then 1000 hypothetical participants. Replace **xxx** accordingly and create a histogram each time.
 
 ```{r}
 # samps <- replicate(xxx, sample(response, size = 22, replace = T))

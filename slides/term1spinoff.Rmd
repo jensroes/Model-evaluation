@@ -1,0 +1,146 @@
+---
+title: "Year 1 stats spin-off -- plots and models"
+author: Dr Jens Roeser 
+#date: Feb 15 2021 # Feb 22 2021
+output: 
+  revealjs::revealjs_presentation:
+    theme: night
+    highlight: tango
+    incremental: false
+    transition: concave
+    background_transition: zoom
+    widescreen: true
+
+bibliography: ["references.bib"]
+csl: apa.csl
+link-citations: yes
+
+---
+
+```{r setup, include=FALSE}
+library(citr)
+library(tidyverse)
+library(magrittr)
+library(psyntur)
+library(ggthemes)
+library(kableExtra)
+library(knitr)
+library(readxl)
+library(extrafont)
+library(broom)
+options("kableExtra.html.bsTable" = T)
+knitr::opts_chunk$set(echo = FALSE,
+                      comment=NA, 
+                      warning = FALSE,
+                      message =FALSE)
+
+theme_set(theme_classic(base_size = 16) +
+          theme(panel.grid = element_line(colour = "grey95"),
+                panel.background = element_rect(fill = "transparent")))
+```
+
+
+# Learning outcomes 
+
+<div style="font-size:1.25em;">
+After completing this lecture, the workshop and your own reading you should be able to ... 
+</div>
+
+
+
+# Overview
+
+- table with plots and associated models
+- decision tree for models
+
+
+# Data visualisation
+
+## Histogram
+
+## Scatterplot
+
+## Tukey boxplot
+
+
+# Data modelling 
+
+## Correlation
+
+```{r}
+N <- 1000
+rs <- c(-.999, -.75, -.25, 0, .25, .75, .999)
+
+cors <- map(rs, ~faux::rnorm_multi(N, 2, 100, 50, ., varnames = c("x", "y")) %>%
+      mutate(correlation = paste0("italic('r')~'='~",.x))) %>%
+  bind_rows() %>%
+  mutate(order = rep(1:length(rs), each = N),
+         correlation = factor(correlation, levels = unique(correlation)[unique(order)], ordered = T))
+  
+ggplot(cors, aes(x = x, y = y)) +
+  geom_point(size = .1, alpha = .5) +
+  facet_wrap(~correlation, labeller = label_parsed) +
+  theme_bw() 
+```
+
+
+## Linear regression
+
+## Independent *t*-test
+
+## Paired samples *t*-test
+
+## One-way ANOVA
+
+## Test statistics and estimates
+
+- F, t, r, $\beta$ (beta), p, df
+
+
+# Model assumptions and evaluation
+
+
+
+
+
+
+
+
+# Epilogue {data-transition="fade-out"}
+
+## Summary {data-transition="fade-in fade-out"}
+
+
+
+## Exam-prep advice {data-transition="fade-in fade-out"}
+
+
+
+## Learning outcomes {data-transition="fade-in fade-out"}
+
+
+
+
+## Useful textbook resources  {data-transition="fade-in fade-out"}
+
+
+
+
+## References  {data-transition="fade-in fade-out"}
+
+<style>
+    .reveal section p {
+    display: inline-block;
+    font-size: 0.7em;
+    line-height: 1.2em;
+    vertical-align: top;
+    horizontal-align: left;
+    margin: 0 0 0 0;
+    line-spacing: .5em;
+  }
+</style>
+
+
+
+
+

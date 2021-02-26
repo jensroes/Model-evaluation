@@ -1,0 +1,565 @@
+---
+title: "Workshop 18 [Week 8]: Model evaluation and violations"
+author: "Jens Roeser"
+date: "Compiled `r Sys.Date()`"
+bibliography: ../slides/references.bib
+csl: ../slides/apa.csl
+link-citations: yes
+output:
+  rmdformats::readthedown:
+    lightbox: true
+    gallery: false
+    highlight: "kate"
+    toc_depth: 1
+    use_bookdown: false
+---
+  
+```{r, include=FALSE}
+library(citr) # CRTL + Shift + R for citations
+library(kableExtra)
+library(rmdformats)
+library(knitr)
+library(tidyverse)
+library(psyntur)
+set.seed(123)
+theme_set(theme_classic(base_size = 20))
+```
+
+```{r setup, include=FALSE}
+opts_knit$set(width=90)
+opts_chunk$set(fig.width = 4, fig.asp = 1)
+knitr::opts_chunk$set(echo = TRUE,
+                      comment=NA, 
+                      warning = FALSE,
+                      message =FALSE)
+
+```
+
+
+# Lecture review
+
+  - Parametric models (*t*-test, ANOVA, linear regression) make assumptions about their input (the data).
+  - Remember **LINE**:
+    - Linearity
+    - Independence
+    - Normality
+    - Equality of variance 
+  - We can evaluate these assumptions on the basis of the unexplained variance (aka residuals).
+  
+
+# Learning outcomes 
+
+This workshop, along with the lecture on model assumptions should give you the opportunity to be able to
+
+  - run-linear regression models with categorical predictors
+  - extract model residuals from linear models
+  - evaluate model assumptions on the basis of the residual error
+
+
+First we will recap the main bits of the evaluation presented in the lecture.
+
+Then, you will have the opportunity to reproduce the evaluation on the *ANOVA*-style model.
+
+For revision see @faraway2014linear chapter 6 (with R code) or @fox2018r chapter 8.1 -- 8.5 (with R code). Also check out [this walkthrough](http://www.sthda.com/english/articles/39-regression-model-diagnostics/161-linear-regression-assumptions-and-diagnostics-in-r-essentials/), [this online chapter](http://www2.compute.dtu.dk/courses/02429/enotepdfs/eNote-6.pdf), and [Chapter 12.3 here](https://ademos.people.uic.edu/Chapter12.html#2_regression_assumptions).
+
+
+# Setup
+
+You need the package `psyntur`:
+
+```{r}
+library(psyntur) 
+packageVersion("psyntur") # should be version 0.0.2
+```
+
+Also these two packages:
+
+```{r}
+#install.packages("moments")
+library(moments)
+#install.packages("tidyverse")
+library(tidyverse)
+```
+
+
+# @blomkvist2017reference data {.tabset .tabset-fade .tabset-pills}
+
+We will use the data from the lecture published in @blomkvist2017reference. The data are average reaction times (rt) assessing cognitive performance through adolescence and adulthood in a real world task; i.e. playing StarCraft II. We will focus on rts from the dominant hand and age coded as continuous variable (`age` in years), as categorical variable with two (`age_2`) and three (`age_3`) levels. Buttons 1. -- 4. will reveal the individual steps.
+
+## 1. Read in data
+
+```{r}
+data <- read_csv("https://raw.githubusercontent.com/jensroes/Model-evaluation/main/data/blomkvist.csv")
+```
+
+## 2. Data overview {.tabset .tabset-fade .tabset-pills}
+
+Generate an overview of the variables using `glimpse`:
+
+```{r}
+glimpse(data) # answer
+```
+
+Use `describe` to calculate the mean, sd, min, and max of `age`. Replace the **xxx**s:
+
+```{r}
+#describe(data = data, 
+#        mean = xxx(age), 
+#         sd =  xxx(age), 
+#         min = xxx(age), 
+#         max = xxx(age))
+```
+
+```{r}
+# answer
+describe(data = data, 
+         mean = mean(age), 
+         sd = sd(age), 
+         min = min(age), 
+         max = max(age))
+```
+
+The variable `age_2` has two levels:
+
+```{r}
+unique(data$age_2)
+```
+
+How many levels has `age_3` and what are their names?
+
+```{r}
+unique(data$age_2) # answer
+```
+
+## 3. Task
+
+Create a histogram of `rt` with 30 bins:
+
+```{r}
+histogram(data = data, x = rt, bins = 30) # answer
+```
+
+## 4. Question
+
+Are the rt data normal distributed?
+
+**Answer:** The rt data are right skewed. Optional: you might also remember from the lecture that the distribution is leptokurtic but that's not obvious to the bare eye.
+
+
+# Fit an lm with continuous predictor
+
+
+## Model with continuous predictor {.tabset .tabset-fade .tabset-pills}
+
+We can predict rts as a function of age. We can do this with age as continuous variable.
+
+```{r}
+model <- lm(rt ~ age, data = data)
+```
+
+### 1. Question
+
+Hang on. Before fitting a parametric model we need to make sure our outcome variable is continuous.
+
+  - Is the outcome variable continuous? 
+    - **Answer:** yes but ...
+  - What's a reason for why rt might not be perfectly continuous (nothing is in practice)?
+    - **Answer:** rts have a lower bound of 0.
+    
+
+### 2. Question
+
+How does age affect the rts?
+
+```{r}
+summary(model) # Answer in age row; slowdown of 5.38 msecs per year 
+```
+
+### 3. Extract residuals 
+
+We can extract the model residuals like so and assign them to a new column called `residuals`:
+
+```{r}
+data <- mutate(data, residuals = residuals(model))
+# If tidyverse doesn't work for you, use
+# data$residuals <- residuals(model) 
+```
+
+### 4. Check out residuals
+
+Have a look at the residuals column.
+
+```{r}
+data
+```
+
+What should be mean of the residuals ideally be? Calculate the mean of the residuals using `describe`.
+
+```{r}
+#describe(data = data, mean = xxx(xxx)) 
+```
+
+```{r}
+describe(data = data, mean = mean(residuals)) # answer
+```
+
+Is this what you would expect?
+
+**Answer:** Absolutely. The mean of the residuals should ideally be 0.
+
+
+## Normality of residuals {.tabset .tabset-fade .tabset-pills}
+
+If our model meets the normality assumption we would expect the residuals to be normal distributed. 
+
+### 1. Task 
+
+Create a histogram of the residuals with 30 bins.
+
+```{r}
+histogram(data = data, x = residuals, bins = 30) # answer
+```
+
+Optional: check the skewness by running:
+
+```{r}
+# install.packages("moments")
+# library(moments)
+# skewness(data$residuals)
+```
+
+Do you think there are reasons to be concerned about the skewness?
+
+
+### 2. Task 
+
+To correct for the normality violation, we can use a log transformation of the rts [@baa08book]. Replace the **xxx**s below to transform the rts and store them in `log_rt`.
+
+```{r}
+# data <- mutate(data, log_rt = log(xxx))
+```
+
+
+```{r}
+data <- mutate(data, log_rt = log(rt)) # answer
+```
+
+
+### 3. Task 
+
+Refit `model` this time with `log_rt` as outcome variable. 
+
+```{r}
+# model <- lm(xxx ~ age, data = data)
+```
+
+```{r}
+model <- lm(log_rt ~ age, data = data) # answer
+```
+
+### 4. Task 
+
+Check the model summary. 
+
+```{r}
+summary(model) # answer
+```
+
+Because the age effect is now on a log-scale we have to think about the slope as showing "with an increase of 1 year of age the rts are 0.008 times longer than the intercept".
+
+
+## Independence of residuals {.tabset .tabset-fade .tabset-pills}
+
+Residuals must be independent. In other words, there should be no correlations between our residuals. There are two things we can do to test for independence:
+
+### 1. Task
+
+We can plot residuals against participant ids in scatterplot. Create such a scatterplot with `residuals` on the y-axis and `id` on the x-axis and add a line of best fit. 
+
+This plot can tell us whether there is some order effect, such as participants that were tested earlier showed more diverse responses than participant that were tested later.
+
+```{r}
+scatterplot(data = data, y = residuals, x = id, best_fit_line = T) # answer
+```
+
+There are three things that you can look for:
+
+ - The line should be horizontal.
+ - The mean of the residuals should be 0 at any given point.
+ - The spread around the line should equal throughout.
+  
+Is there anything you observe in this plot that might indicate a violation of independence?
+
+**Answer:** The line is horizontal but there seems to be less variability for participants that did the experiment earlier. There are no serious concerns though.
+
+### 2. Task
+
+We can plot the residuals against predicted data. Linear models can be use to predict data. The residuals should be independent of the predicted data. In other words, we'd expect the same to apply as in Task 1.
+
+First, predict data from the model; replace **xxx** correctly:
+
+```{r}
+#data <- mutate(data, predict = predict(xxx))
+```
+
+```{r}
+data <- mutate(data, predict = predict(model)) # answer
+```
+
+Then, create a scatterplot with `residuals` on the y-axis and `predict` on the x-axis; add a line of best fit. 
+
+```{r}
+#scatterplot(data = data, y = xxx, x = xxx, best_fit_line = xxx) 
+```
+
+
+```{r}
+scatterplot(data = data, y = residuals, x = id, best_fit_line = T) # answer
+```
+
+
+## Linearity & equality of variance {.tabset .tabset-fade .tabset-pills}
+
+We can test both in one go and evaluate the linearity and the equality (homogeneity) of variance assumption. 
+
+Again, we need a scatterplot, this time with the predictor plotted again the residuals.
+
+```{r}
+scatterplot(data = data, y = residuals, x = age, best_fit_line = T) # answer
+```
+
+The same as above applies. 
+
+  - **Linearity:** The mean of the residuals should be 0 at any given age.
+  - **Equality of variance:** The spread around the line should constant throughout.
+
+Do you observe any problems?
+
+**Answer:** There might be evidence for both, linearity and equality of variance violations. There is more variance in the older groups (on the right end of the plot) and younger (20-25ish) and much older (60-100) participants are slower than the middle-aged participants.
+
+
+# Fit lms with categorical predictor {.tabset .tabset-fade .tabset-pills}
+
+In the lecture you saw that we can do *t*-test and *ANOVA*s in `lm()` by using categorical predictors instead of a continuous predictor. This is important because we want to evaluate our models on the basis of the residual error.
+
+We will now test the assumptions on models with age as categorical predictor. We already know the rts are positively skewed, hence we will use `log_rt` as outcome variable.
+
+## 1. Model fit
+
+We can fit `lm`s with categorical predictors. Instead of age as continuous predictor, use the categorical predictor `age_2` (2 groups) and assign the model output to `model_2`:
+
+```{r}
+# xxx <- lm(log_rt ~ xxx, data = data) 
+```
+
+```{r}
+model_2 <- lm(log_rt ~ age_2, data = data) # Answer
+```
+
+Tada, a *t*-test style model!
+
+How does age affect the rts? Hint: use `summary`
+  
+```{r}
+summary(model_2) # Answer: 206.5 msecs difference between old and young group.
+```
+
+Now lets do the same for an *ANOVA*-type problem. Use the age predictor with 3 groups and call the model `model_3`. 
+
+```{r}
+# xxx <- lm(log_rt ~ xxx, data = data)
+```
+
+
+```{r}
+model_3 <- lm(log_rt ~ age_3, data = data) # Answer
+```
+
+Evaluate `model_3` with `anova`.
+
+```{r}
+anova(model_3) # Answer
+```
+
+
+## 2. Residuals
+
+We'll evaluate the two models using their residuals.
+
+Extract the residuals of the *t*-test style model `model_2` and store them in `residuals_2` using the following code. 
+
+```{r}
+# data <- mutate(data, xxx = residuals(xxx))
+```
+
+```{r}
+data <- mutate(data, residuals_2 = residuals(model_2)) # answer
+```
+
+Repeat the same for the *ANOVA*-style model `model_3` and store the residuals in `residuals_3`.
+
+```{r}
+data <- mutate(data, residuals_3 = residuals(model_3)) # answer
+```
+
+Check out the new columns in the dataset using this code:
+
+```{r}
+#select(data, log_rt, residuals, residuals_2, residuals_3)
+```
+
+## 3. Linearity
+
+No reason for stats here. Are there any reasons to be concerned about linearity problems for categorical predictors (see lecture if needed)?
+
+Let's have a look anyway. Because we have categorical predicts, we need `tukeyboxplot` instead of `scatterplot`. Fill in the **xxx**s. We want the residuals of `model_2` on the y-axis and `age_2` on the x-axis.
+
+```{r}
+#tukeyboxplot(data = data, y = xxx, x = xxx)
+```
+
+```{r}
+tukeyboxplot(data = data, y = residuals_2, x = age_2) # answer
+```
+
+Repeat of the residuals of `model_3` and `age_3`.
+
+```{r}
+tukeyboxplot(data = data, y = residuals_3, x = age_3) # answer
+```
+
+Do you have any concerns that linearity might be violated?
+
+**Answer:** No reason to worry at all. As we learned in the lecture, for categorical predictors there is no reason to assume anything but a linear relationship (imagine a horizontal line between the boxes from your boxplots).
+
+## 4. Independence
+
+We tested independence above on the basis of participant ids using scatterplots. Create a scatterplot with `residuals_2` on the y and `id` on the x-axis; add a line of best fit. 
+
+```{r}
+#scatterplot(data = data, y = xxx, x = xxx, best_fit_line = xxx)
+```
+
+```{r}
+scatterplot(data = data, y =residuals_2, x = id, best_fit_line = T) # answer
+```
+
+Is there any reason to be concerned about independence problems?
+
+**Answer:** Not a lot. If anything when you observe that participants between 100 and 150 have positive residuals and there is larger variability for later participants (around 300). 
+
+### Bonus 
+
+Plotting the predicted rts against the residuals isn't a good option here. Check the following scatterplot. Can you work out why this doesn't help here?
+
+First, extract predicted data. Replace the **xxx**s correctly. We want to extract the predicted rts from `model_2` and store them in `predict_2`.
+
+```{r}
+#data <- mutate(data, xxx = predict(xxx)) 
+```
+
+```{r}
+data <- mutate(data, predict_2 = predict(model_2)) # answer
+```
+
+Repeat for `model_3` and save the predicted rts in `predict_3`.
+
+```{r}
+data <- mutate(data, predict_3 = predict(model_3)) # answer
+```
+
+```{r}
+#scatterplot(data = data, y = residuals_2, x = predict_2)
+```
+
+**Answer:** Our model creates predictions on the basis of the predictor(s). Before that was for every age but now it's only age group. There is nothing in out model that allows for variability in the rts between different participants, so there are only prediction by age-group and not variability for different participants. This is beyond year 1 statistics: this problem can be addressed with random-intercepts models [see e.g. @baayen2008mixed].
+
+## 5. Normality
+
+We can assess normality in histograms. Create a histogram for `model_2` with `residuals_2` on the x-axis and 20 bins. 
+
+```{r}
+#histogram(data = data, x = xxx, bins = xxx)
+```
+
+```{r}
+histogram(data = data, x = residuals_2, bins = 20) # answer
+```
+
+Repeat for the residuals of `model_3`.
+
+```{r}
+histogram(data = data, x = residuals_3, bins = 20) # answer
+```
+
+Now, lets also calculate the skewness of the residuals. For the residuals of `model_2` replace the **xxx**s with `residuals_2`.
+
+```{r}
+#library(moments)
+#describe(data = data, skew = skewness(xxx))
+```
+
+```{r}
+library(moments)
+describe(data = data, skew = skewness(residuals_2)) # answer
+```
+
+Repeat for the residuals of `model_3`.
+
+```{r}
+#describe(data = data, skew = skewness(xxx)) 
+```
+
+
+```{r}
+describe(data = data, skew = skewness(residuals_3)) # answer
+```
+
+Repeat for kurtosis:
+
+```{r}
+#describe(data = data, kurt = kurtosis(xxx)) 
+```
+
+
+```{r}
+describe(data = data, kurt = kurtosis(residuals_2)) # answer
+```
+
+```{r}
+describe(data = data, kurt = kurtosis(residuals_3)) # answer
+```
+
+Do we need to be concerned about normality?
+
+**Answer:** Not a lot. The tails are a little wide and there seem to be some issues with kurtosis (*k* > 3). Skewness seems to be fine though (-2 $<$ skew $<$ 2).
+
+## 6. Equality of variance
+
+We've had a look at this earlier (without knowing). The boxplots for the residuals of `model_2` (in particular the whiskers of the boxes) show us the variance for each group. We see that the variability in the old group is larger than the variability in the young group.
+
+```{r}
+tukeyboxplot(data = data, x = age_2, y = residuals_2)
+```
+
+Repeat the boxplot for the residuals of `model_3`. Does any of the three groups show a larger variability?
+
+```{r}
+tukeyboxplot(data = data, x = age_3, y = residuals_3) # answer
+```
+
+**Answer:** The variability in the old group is larger than in the other two groups.
+
+# Summary
+
+Well done. You just achieved a whole lot!
+
+  - You fitted 3 models, 1 with a continuous and 2 with a categorical predictor.
+  - You extracted the residuals of all of them,
+  - scrutinised the residuals with regards to *LINE* linearity, independence, normality, equality (of variance),
+  - and you used a log transformation to correct for a violation of normality.
+
+# References
+
+<div id="refs"></div>
+  

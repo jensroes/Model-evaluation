@@ -1,0 +1,118 @@
+---
+title: "Week 17: Model-evaluation quiz [answers]"
+author: "Jens Roeser"
+date: "Compiled `r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    fig_width: 8
+    fig_height: 4
+    lightbox: true
+    gallery: false
+    highlight: "kate"
+
+---
+
+
+```{r, include=FALSE}
+library(citr) # CRTL + Shift + R for citations
+library(kableExtra)
+library(rmdformats)
+library(knitr)
+library(tidyverse)
+library(stringi)
+library(qualtRics)
+library(janitor)
+theme_set(theme_bw(base_size = 12) + 
+            theme(axis.ticks.y = element_blank()))
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      comment=NA, 
+                      warning = FALSE,
+                      message =FALSE)
+
+```
+
+
+```{r}
+file <- list.files("../data", pattern = "evaluation", full.names = T)
+
+questions <- read_csv(file) %>% select(starts_with("Q")) 
+questions <- as.data.frame(t(questions[1,])) %>%
+  rownames_to_column("Qs") %>%
+  rename(questions = V1) %>%
+  mutate(Qs = str_to_lower(Qs),
+         questions = gsub(x = questions, pattern = "How would you evaluate the quiz (more stars indicates endorsement)? - ", replacement = "", fixed = TRUE)) %>% pull(questions)
+
+d <- read_survey(file) %>% clean_names() %>% select(starts_with("q")) %>% drop_na() 
+question_id <- names(d)
+
+ppts <- nrow(d)
+d %<>% mutate_if(is.character, ~sjmisc::word_wrap(., 30)) %>%
+  mutate_all(as.character) %>%  pivot_longer(everything()) %>%
+  group_by(name, value) %>% mutate(count = n()) %>% group_by(name) %>%
+  mutate(max = max(count), highlight = count == max) %>% ungroup() %>%
+  mutate(section = "",
+         section = if_else(name %in% paste0("q",c(3:6,41)), "Part 1 (1): assumptions and statistical modelling", section),
+         section = if_else(name %in% paste0("q",c(8:14)), "Part 1 (2): residuals and normality", section),
+         section = if_else(name %in% paste0("q",c(19,16,42:46)), "Part 2: independence of residuals", section),
+         section = if_else(section == "", "Part 3: quiz evaluation", section )) %>% arrange(section,name) %>%
+  mutate(highlight = if_else(grepl("Part 3", section), FALSE, highlight),
+         highlight = if_else(name ==  "q44" & grepl(pattern = "Jens", x = value), TRUE, highlight),
+         highlight = if_else(name ==  "q44" & !grepl(pattern = "Jens", x = value), FALSE, highlight),
+         highlight = if_else(name ==  "q5" & grepl(pattern = "the predictor variable is categorical", x = value), FALSE, highlight),
+         highlight = if_else(name ==  "q5" & grepl(pattern = "the predictor variable is categorical", x = value), FALSE, highlight))
+
+```
+
+A total of `r ppts` students completed [this quiz](https://ntupsychology.eu.qualtrics.com/jfe/form/SV_dmtBg1o0LfbVfFk) (status: `r Sys.time()`). The correct answers are highlighted in green in the bar plots below. If you don't understand why an answer is correct, or why an answer isn't correct, please ask on Teams. 
+
+
+```{r results="asis"}
+sec2 <- "nope"
+for(i in 1:(length(question_id))){
+  sec <- unique(d[d$name == question_id[i],]$section)
+  if(sec != sec2){
+    cat("\n") 
+    cat("## ", sec, "{.tabset .tabset-fade .tabset-pills}\n") # section headers with buttons for subsections
+    sec2 <- sec
+  }
+  
+  cat("\n") 
+  cat("### ", questions[i], "\n") # subsection headers
+  
+  if(grepl("q48", question_id[i])){
+    print(
+      
+    # Create a plot
+    d %>% filter(name == question_id[i]) %>%
+      ggplot(aes(x = value, fill = highlight)) +
+        geom_bar(alpha = .5, show.legend = F) +
+        labs(x = "Endorsement (1=low, 6=high)", y = "Frequency") + coord_flip() +
+        scale_fill_manual(values = c("FALSE" = "grey",  "TRUE" = "forestgreen"))
+    )
+  }
+  if(!grepl("q48", question_id[i])){
+    print(
+    # Create a plot
+    d %>% filter(name == question_id[i]) %>%
+      ggplot(aes(x = value, fill = highlight)) +
+        geom_bar(alpha = .5, show.legend = F) +
+        labs(x = "Answers", y = "Frequency") + coord_flip() +
+        scale_fill_manual(values = c("FALSE" = "grey",  "TRUE" = "forestgreen"))
+    )
+  }
+
+
+  if(question_id[i] == "q44"){
+    cat("\n") 
+    cat("Ooops! Read all answers again. You got this :)", "\n") 
+  }  
+  if(question_id[i] == "q5"){
+    cat("\n") 
+    cat("Ooops! Okay granted, this isn't simple. So far you have learnt linear models with continuous outcome variables (we will cover linear models with non-continous outcome variables next year). ANOVAs and *t*-test have categorical predictor variables which you called groups or conditions. Those are categories (= categorical). In the lecture (and in the workshop week 18) I demoned how to fit linear models with categorical predictors akin to *t*-tests and ANOVAs.", "\n")
+  }  
+  cat("\n")
+}
+```

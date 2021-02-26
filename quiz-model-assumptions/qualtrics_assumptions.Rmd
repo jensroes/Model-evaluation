@@ -136,7 +136,7 @@ for(i in 1:(length(question_id))){
   
   if(question_id[i] == "q8"){
     cat("\n") 
-    cat("Ooops! What's going on here? To be honest, my bad, I guess. I intended the answer FALSE because discrete data itself is non-continuous / categorical and therefore is not normal distributed. However, I do see why so many answered TRUE. If you watched the entire lecture before answering the quiz you probably thought that discrete data are normal distributed under the CLT. Awesome, this shows real learning and you can be proud of yourself. So let's just agree both answers are correct here and move on :)", "\n") 
+    cat("Ooops! What's going on here? Discrete data are non-continuous / categorical and therefore cannot be normal distributed. However, I do see why so many answered TRUE. If you watched the entire lecture before answering the quiz you probably thought that discrete data are normal distributed under the CLT. Awesome, this shows real learning and you can be proud of yourself. So let's just agree both answers are correct here and move on :)", "\n") 
   
   }  
   cat("\n")

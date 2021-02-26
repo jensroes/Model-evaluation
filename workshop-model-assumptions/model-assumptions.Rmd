@@ -64,13 +64,15 @@ library(psyntur)
 packageVersion("psyntur") # should be version 0.0.2
 ```
 
+
+
 # The normal distribution
 
 ## Simulate normal distributed data  {.tabset .tabset-fade .tabset-pills}
 
 To draw out a normal distribution, we need to know the mean and the standard deviation.
 
-The function `rnorm` (*r*=random, *norm*=normal) allows us to randomly sample normal distributed data. The function takes three parameter values: the number of samples *n* we want to obtain from a distribution with a *mean*, and a standard deviation *sd* or some sort. Go through the example revealed by Buttons 1. -- 3.
+The function `rnorm` (*r*=random, *norm*=normal) allows us to randomly sample normal distributed data. The function takes three parameter values: the number of samples *n* we want to obtain from a distribution with a *mean*, and a standard deviation *sd* of some sort. Go through the example revealed by Buttons 1. -- 3.
 
 ### 1. Create random data
 
@@ -93,7 +95,7 @@ x # Tada, 5 random values
 
 Functions like `rnorm` allow us to control population parameters. In reality we rarely know the population mean, say, the average time it takes to recover from COVID-19, but we can estimate it from a large enough sample and repeated sampling from the population. These unknown population parameters are conventionally indicated with Greek letters, i.e. $\mu$ (mu; the population mean) and $\sigma$ (sigma; the population standard deviation). 
 
-Because we don't know the population parameters in real life, functions like `rnorm` are great. We can simulate data of which we **do** know the parameter values, because we defined both above (i.e. `mean`, `sd`).
+Because we don't know the population parameters in real life, functions like `rnorm` are great. We can simulate data of which we **do** know the parameter values, because we defined both (i.e. `mean`, `sd`).
 
 
 ### 3. Plot the data
